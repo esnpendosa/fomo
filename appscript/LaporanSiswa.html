@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <base target="_top"/>
+  <title>FOMO — Laporan Hasil Siswa</title>
+  <?!= include('CSS'); ?>
+  <style>
+    /* ---- Print ---- */
+    @media print {
+      .print-hide, .app-header { display: none !important; }
+      body { background: white; font-size: 11pt; }
+      .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; margin-bottom: 12pt; }
+      .report-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .tabel-skor td, .tabel-skor th { border: 1px solid #ccc !important; }
+    }
+
+    /* ---- Report header ---- */
+    .report-header {
+      background: linear-gradient(135deg, #F39C12 0%, #D35400 100%);
+      color: var(--white);
+      padding: 24px 24px 20px;
+      border-radius: var(--r-xl) var(--r-xl) 0 0;
+    }
+    .report-title  { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: .9; margin-bottom: 6px; }
+    .report-nama   { font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 4px; }
+    .report-sub    { font-size: 13px; opacity: .9; margin-bottom: 14px; }
+    .report-chips  { display: flex; flex-wrap: wrap; gap: 8px; }
+    .report-chip   {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+      border-radius: var(--r-md); padding: 4px 12px;
+      font-size: 12px; font-weight: 500;
+    }
+
+    /* ---- Tabel skor RIASEC (seperti Excel) ---- */
+    .tabel-skor {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px; border-radius: var(--r-md); overflow: hidden;
+    }
+    .tabel-skor th {
+      padding: 10px 14px; text-align: center;
+      font-weight: 700; font-size: 12px;
+      background: #FFEAA7; color: #975A16;
+      border: 1px solid #E2E8F0;
+      letter-spacing: .5px;
+    }
+    .tabel-skor td {
+      padding: 10px 14px; text-align: center;
+      border: 1px solid #E2E8F0; font-weight: 600;
+    }
+    .tabel-skor .skor-val {
+      font-size: 20px; font-weight: 800;
+      color: #1A365D; line-height: 1;
+    }
+    .tabel-skor .skor-pct {
+      font-size: 11px; color: var(--gray-500);
+      margin-top: 2px;
+    }
+    .skor-r { border-top: 3px solid #DC2626 !important; }
+    .skor-i { border-top: 3px solid #1565C0 !important; }
+    .skor-a { border-top: 3px solid #7C3AED !important; }
+    .skor-s { border-top: 3px solid #16A34A !important; }
+    .skor-e { border-top: 3px solid #D97706 !important; }
+    .skor-c { border-top: 3px solid #0284C7 !important; }
+
+    /* ---- Grafik radar ---- */
+    .radar-wrap { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
+
+    /* ---- Kode Holland badge ---- */
+    .holland-code {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 28px; font-weight: 900;
+      color: #1D4ED8; letter-spacing: 4px;
+      background: #EFF6FF; border: 2px solid #BFDBFE;
+      border-radius: var(--r-lg); padding: 12px 24px;
+      margin-bottom: 12px; font-family: 'SF Mono','Fira Code',monospace;
+    }
+
+    .badge-konsistensi {
+      display: inline-block; padding: 4px 12px; border-radius: 6px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+    }
+    .kons-Tinggi { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; }
+    .kons-Sedang { background: #FEF9C3; color: #A16207; border: 1px solid #FDE047; }
+    .kons-Rendah { background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; }
+
+    /* ---- Dimensi detail rows ---- */
+    .dimensi-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--gray-100);
+    }
+    .dimensi-row:last-child { border-bottom: none; }
+    .dimensi-kode {
+      width: 32px; height: 32px; border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: var(--white); flex-shrink: 0;
+    }
+    .dimensi-info { flex: 1; }
+    .dimensi-nama { font-size: 13px; font-weight: 600; color: var(--gray-800); margin-bottom: 3px; }
+    .dimensi-bar-bg { height: 8px; background: var(--gray-200); border-radius: 999px; overflow: hidden; }
+    .dimensi-bar-fill { height: 100%; border-radius: 999px; transition: width .6s ease; }
+    .dimensi-angka {
+      text-align: right; flex-shrink: 0; min-width: 60px;
+    }
+    .dimensi-skor { font-size: 15px; font-weight: 800; color: var(--blue-800); }
+    .dimensi-pct  { font-size: 11px; color: var(--gray-500); }
+
+    /* ---- Profesi grid ---- */
+    .profesi-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .profesi-item {
+      font-size: 11px; font-weight: 500; padding: 4px 10px;
+      border-radius: var(--r-sm); background: var(--blue-50);
+      color: var(--blue-700); border: 1px solid var(--blue-100);
+    }
+
+    /* ---- Tabel jawaban ---- */
+    .tabel-jawaban { font-size: 12px; }
+    .tabel-jawaban th { font-size: 11px; }
+    .tabel-jawaban td { padding: 8px 12px; }
+    .jwb-ya    { color: var(--green-600); font-weight: 700; }
+    .jwb-tidak { color: var(--gray-400); }
+
+    /* ---- Rekap jawaban per dimensi ---- */
+    .rekap-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 12px;
+    }
+    .rekap-card {
+      border: 1px solid var(--gray-200); border-radius: var(--r-lg);
+      padding: 12px; text-align: center; background: var(--gray-50);
+    }
+    .rekap-kode { font-size: 18px; font-weight: 900; font-family: 'SF Mono',monospace; margin-bottom: 4px; }
+    .rekap-ya { font-size: 13px; font-weight: 700; color: var(--green-600); }
+    .rekap-total { font-size: 11px; color: var(--gray-500); }
+
+    @media(max-width:600px) {
+      .rekap-grid { grid-template-columns: repeat(2,1fr); }
+      .tabel-skor th, .tabel-skor td { padding: 8px 6px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Memuat laporan...</div>
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Header -->
+<header class="app-header print-hide">
+  <div class="header-brand">
+    <span style="font-size:16px;font-weight:800;color:var(--blue-800);letter-spacing:-.5px;">FOMO</span>
+    <div class="brand-sep"></div>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--gray-800);">Laporan Hasil Per Siswa</div>
+      <div style="font-size:11px;color:var(--gray-500);" id="hdrSub">Report Holland Test (RIASEC)</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary btn-sm" onclick="window.print()">
+      <svg class="icon icon-sm"><use href="#i-printer"/></svg> Cetak / Unduh PDF
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="kembali()">
+      <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg> Kembali
+    </button>
+  </div>
+</header>
+
+<div class="page-content" style="max-width:860px;">
+
+  <!-- Admin Selector Bar -->
+  <div id="adminSelectorBar" class="print-hide" style="display:none;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:700;color:#1E293B;text-transform:uppercase;">Pilih Siswa / Peserta:</span>
+        <select id="selSiswaLaporan" onchange="gantiSiswaLaporan(this.value)" style="padding:6px 12px;border:1px solid #94A3B8;border-radius:6px;font-size:13px;font-weight:600;min-width:280px;background:#FFF;color:#0F172A;">
+          <option value="">-- Memuat daftar peserta... --</option>
+        </select>
+      </div>
+      <div>
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=admin" class="btn btn-secondary btn-sm" style="text-decoration:none;">
+          <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg> Panel Admin
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="memuatState">
+    <div class="card"><div class="card-body text-center" style="padding:48px;">
+      <div class="spinner" style="margin:0 auto 14px;"></div>
+      <div style="font-size:13px;color:var(--gray-500);">Memuat laporan siswa...</div>
+    </div></div>
+  </div>
+
+  <!-- Konten laporan -->
+  <div class="hidden" id="laporanKonten">
+
+    <!-- ===== HEADER REPORT ===== -->
+    <div class="card" style="margin-bottom:16px;border:none;overflow:hidden;box-shadow:var(--shadow-md);">
+      <div class="report-header" id="reportHeader">
+        <div class="report-title">REPORT HOLLAND TEST (RIASEC)</div>
+        <div class="report-nama" id="rNama">—</div>
+        <div class="report-sub" id="rSub">—</div>
+        <div class="report-chips" id="rChips"></div>
+      </div>
+      <div class="card-body" style="padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;" id="rInfoGrid">
+          <!-- diisi JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TABEL SKOR RIASEC (seperti Excel) ===== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-table"/></svg></div>
+        <span class="card-title">Skor Jawaban RIASEC Holland</span>
+      </div>
+      <div class="card-body">
+        <table class="tabel-skor" id="tabelSkor">
+          <thead>
+            <tr id="thKode"></tr>
+          </thead>
+          <tbody>
+            <tr id="trSkor"></tr>
+          </tbody>
+        </table>
+        <div style="font-size:11px;color:var(--gray-500);margin-top:8px;text-align:right;">
+          Maks. 18 poin per kategori (18 pernyataan per dimensi)
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GRAFIK RADAR ===== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-activity"/></svg></div>
+        <span class="card-title">Grafik Radar RIASEC Holland</span>
+      </div>
+      <div class="card-body text-center">
+        <div class="radar-wrap">
+          <svg id="radarSvg" viewBox="0 0 420 380" width="100%" style="max-width:420px;display:block;margin:0 auto;"></svg>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px;" id="radarLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KODE HOLLAND & PROFIL ===== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-star"/></svg></div>
+        <span class="card-title">Profil Minat dan Kepribadian Holland</span>
+      </div>
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <div class="text-xs text-muted mb-2" style="letter-spacing:1px;text-transform:uppercase;">Kode Holland (3 Tipe Dominan)</div>
+          <div class="holland-code" id="hollandCode">—</div>
+          <div style="margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:600;color:#475569;">Konsistensi : </span>
+            <span class="badge-konsistensi" id="badgeKonsistensi">Tinggi</span>
+          </div>
+          <div style="font-size:13px;color:var(--gray-600);" id="hollandNama">—</div>
+        </div>
+        <hr class="divider"/>
+        <div id="dimensiList"><!-- diisi JS --></div>
+      </div>
+    </div>
+
+    <!-- ===== REKOMENDASI PROFESI (EXCEL REFERENSI) ===== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-target"/></svg></div>
+        <span class="card-title">Interpretasi dan Contoh Profesi Terkait</span>
+      </div>
+      <div class="card-body" id="rekomendasiBody">
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:6px;">Deskripsi Profil Kombinasi:</div>
+          <div style="font-size:13.5px;color:#334155;line-height:1.6;" id="interpDeskripsi">—</div>
+        </div>
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:6px;">Contoh Profesi Terkait:</div>
+          <div style="font-size:13.5px;color:#334155;line-height:1.6;font-weight:500;" id="interpProfesi">—</div>
+        </div>
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:#166534;text-transform:uppercase;margin-bottom:6px;">Berdasarkan Kombinasi Tipe Minat*:</div>
+          <div style="font-size:13.5px;color:#14532D;line-height:1.6;white-space:pre-line;" id="interpKombinasi">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REKAP JAWABAN PER DIMENSI ===== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-check-square"/></svg></div>
+        <span class="card-title">Rekap Jawaban Per Dimensi</span>
+      </div>
+      <div class="card-body">
+        <div class="rekap-grid" id="rekapGrid"><!-- diisi JS --></div>
+      </div>
+    </div>
+
+    <!-- ===== DETAIL JAWABAN PER SOAL ===== -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-list"/></svg></div>
+        <span class="card-title">Detail Jawaban 108 Soal</span>
+        <button class="btn btn-ghost btn-sm print-hide" style="margin-left:auto;" onclick="toggleDetail()">
+          <svg class="icon icon-sm" id="detailToggleIcon"><use href="#i-chevron-down"/></svg>
+          <span id="detailToggleLabel">Tampilkan</span>
+        </button>
+      </div>
+      <div class="hidden" id="detailJawabanWrap">
+        <div style="padding:0 16px 16px;">
+          <div class="table-wrap">
+            <table class="data-table tabel-jawaban">
+              <thead><tr>
+                <th>#</th><th>ID</th><th>Pernyataan Soal</th>
+                <th>Kode</th><th>Jawaban</th><th>Nilai</th>
+              </tr></thead>
+              <tbody id="bodyJawaban"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AKSI ===== -->
+    <div class="card print-hide">
+      <div class="card-body">
+        <div class="d-flex gap-3 flex-wrap">
+          <button class="btn btn-primary flex-1 btn-lg" onclick="window.print()">
+            <svg class="icon icon-sm"><use href="#i-printer"/></svg> Cetak / Unduh PDF
+          </button>
+          <button class="btn btn-secondary flex-1 btn-lg" onclick="kembali()">
+            <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg> Kembali ke Laporan
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /laporanKonten -->
+
+  <!-- Error -->
+  <div class="hidden" id="errorState">
+    <div class="card"><div class="card-body">
+      <div class="empty-state">
+        <svg class="icon icon-2xl empty-state-icon"><use href="#i-alert-circle"/></svg>
+        <div class="empty-state-title">Data Tidak Ditemukan</div>
+        <div class="empty-state-desc" id="errorMsg">Laporan tidak ditemukan.</div>
+        <button class="btn btn-primary mt-4" onclick="kembali()">
+          <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg> Kembali
+        </button>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<script>
+  var BIDANG = {
+    R: { nama:'Realistik',    warna:'#DC2626', bg:'#FEE2E2', label:'Realistic' },
+    I: { nama:'Investigatif', warna:'#1565C0', bg:'#DBEAFE', label:'Investigative' },
+    A: { nama:'Artistik',     warna:'#7C3AED', bg:'#EDE9FE', label:'Artistic' },
+    S: { nama:'Sosial',       warna:'#16A34A', bg:'#DCFCE7', label:'Social' },
+    E: { nama:'Enterprising', warna:'#D97706', bg:'#FEF3C7', label:'Enterprising' },
+    C: { nama:'Konvensional', warna:'#0284C7', bg:'#E0F2FE', label:'Conventional' }
+  };
+
+  var URUTAN = ['R','I','A','S','E','C'];
+  var MAKS   = 18;
+  var detailTerbuka = false;
+
+  window.onload = function() {
+    var p = new URLSearchParams(window.location.search);
+    var token = p.get('token') || sessionStorage.getItem('fomo_token') || '';
+    var isAdmin = !!sessionStorage.getItem('fomo_admin');
+
+    if (isAdmin || !token) {
+      var selBar = document.getElementById('adminSelectorBar');
+      if (selBar) selBar.style.display = 'block';
+      muatDaftarSiswaSelector(token);
+    } else {
+      muatLaporanToken(token);
+    }
+  };
+
+  function muatDaftarSiswaSelector(targetToken) {
+    setLoading(true, 'Memuat daftar peserta...');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        var sel = document.getElementById('selSiswaLaporan');
+        if (!res || !res.success || !res.data || res.data.length === 0) {
+          if (targetToken) {
+            muatLaporanToken(targetToken);
+          } else {
+            document.getElementById('memuatState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorMsg').textContent = 'Belum ada data siswa yang menyelesaikan tes.';
+          }
+          return;
+        }
+
+        sel.innerHTML = '<option value="">-- Pilih Siswa (' + res.data.length + ' Peserta) --</option>';
+        res.data.forEach(function(s) {
+          var opt = document.createElement('option');
+          opt.value = s.token;
+          opt.textContent = (s.nama || s.token) + ' (' + (s.pendidikan || s.jenjang || '-') + ') - ' + (s.top3Kode || '-');
+          if (targetToken && s.token === targetToken) opt.selected = true;
+          sel.appendChild(opt);
+        });
+
+        var chosenToken = targetToken || (res.data[0] ? res.data[0].token : '');
+        if (chosenToken) {
+          sel.value = chosenToken;
+          muatLaporanToken(chosenToken);
+        } else {
+          document.getElementById('memuatState').classList.add('hidden');
+          document.getElementById('errorState').classList.remove('hidden');
+          document.getElementById('errorMsg').textContent = 'Belum ada data siswa.';
+        }
+      })
+      .withFailureHandler(function(err) {
+        setLoading(false);
+        if (targetToken) {
+          muatLaporanToken(targetToken);
+        } else {
+          document.getElementById('memuatState').classList.add('hidden');
+          document.getElementById('errorState').classList.remove('hidden');
+          document.getElementById('errorMsg').textContent = 'Gagal memuat daftar siswa: ' + (err.message || '');
+        }
+      })
+      .getAllHasil('semua', 'semua');
+  }
+
+  function gantiSiswaLaporan(token) {
+    if (!token) return;
+    muatLaporanToken(token);
+  }
+
+  function muatLaporanToken(token) {
+    if (!token) return;
+    setLoading(true, 'Memuat laporan siswa...');
+    document.getElementById('errorState').classList.add('hidden');
+    document.getElementById('laporanKonten').classList.add('hidden');
+    document.getElementById('memuatState').classList.remove('hidden');
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        document.getElementById('memuatState').classList.add('hidden');
+        if (!res || !res.success) {
+          document.getElementById('errorState').classList.remove('hidden');
+          document.getElementById('errorMsg').textContent = res ? res.message : 'Laporan tidak ditemukan.';
+          return;
+        }
+        renderLaporan(res);
+      })
+      .withFailureHandler(function(err) {
+        setLoading(false);
+        document.getElementById('memuatState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('errorMsg').textContent = 'Gagal memuat: ' + (err.message || '');
+      })
+      .getLaporanSiswa(token);
+  }
+
+  function renderLaporan(d) {
+    document.getElementById('laporanKonten').classList.remove('hidden');
+
+    var bio = d.biodata || {};
+    var tglStr = d.timestamp || '';
+
+    // Header
+    document.getElementById('rNama').textContent  = bio.nama || d.token;
+    document.getElementById('rSub').textContent   = (bio.pendidikan||bio.jenjang||'') + (bio.sekolah ? ' — ' + bio.sekolah : '');
+    document.getElementById('rChips').innerHTML   =
+      rChip('Token: ' + d.token) +
+      rChip('JK: ' + (bio.jenisKelamin || 'Laki-laki')) +
+      rChip('Tgl Lahir: ' + (bio.tanggalLahirText || bio.tanggalLahir || '—')) +
+      rChip('Pendidikan: ' + (bio.pendidikan || bio.jenjang || 'SD')) +
+      rChip(tglStr);
+
+    document.getElementById('hdrSub').textContent = bio.nama ? 'Laporan: ' + bio.nama : 'Report Holland Test (RIASEC)';
+
+    // Info grid
+    document.getElementById('rInfoGrid').innerHTML =
+      infoBox('Nama Lengkap', bio.nama||'—') +
+      infoBox('Jenis Kelamin', bio.jenisKelamin||'Laki-laki') +
+      infoBox('Tanggal Lahir', bio.tanggalLahirText||bio.tanggalLahir||'—') +
+      infoBox('Tingkat Pendidikan', bio.pendidikan||bio.jenjang||'SD') +
+      infoBox('Asal Sekolah', bio.sekolah||'—') +
+      infoBox('Nomor WhatsApp', bio.noHp||'—') +
+      infoBox('Waktu Selesai', tglStr);
+
+    // Tabel skor
+    renderTabelSkor(d.skor || {}, d.persen || {});
+
+    // Radar
+    renderRadar(d.skor || {});
+
+    // Kode Holland & Konsistensi
+    var interp = d.interpretasi || {};
+    var top3 = d.top3Kode || 'RIA';
+    document.getElementById('hollandCode').textContent = top3;
+
+    var kons = interp.konsistensi || 'Sedang';
+    var kBadge = document.getElementById('badgeKonsistensi');
+    kBadge.textContent = kons;
+    kBadge.className = 'badge-konsistensi kons-' + kons;
+
+    document.getElementById('hollandNama').textContent = (d.top3Nama || []).join(' — ');
+
+    // Interpretasi text
+    document.getElementById('interpDeskripsi').textContent = interp.deskripsi || '—';
+    document.getElementById('interpProfesi').textContent = interp.profesiTerkait || '—';
+
+    var multiTxt = '';
+    if (interp.profesiKombinasi3) multiTxt += 'Kombinasi ' + interp.top3Kode + ' = ' + interp.profesiKombinasi3 + '\n\n';
+    if (interp.profesiKombinasi2) multiTxt += 'Kombinasi ' + interp.code2 + ' = ' + interp.profesiKombinasi2;
+    document.getElementById('interpKombinasi').textContent = multiTxt || 'Tersedia pada dokumen asesmen.';
+
+    // Dimensi list
+    renderDimensiList(d.ranked || [], d.skor || {});
+
+    // Rekap jawaban per dimensi
+    renderRekapGrid(d.rekapDimensi || {});
+
+    // Detail jawaban
+    renderDetailJawaban(d.jawabanLengkap || []);
+  }
+
+  function renderTabelSkor(skor, persen) {
+    document.getElementById('thKode').innerHTML = URUTAN.map(function(k) {
+      return '<th>'+k+'<br/><span style="font-weight:600;font-size:11px;">'+BIDANG[k].label+'</span></th>';
+    }).join('');
+
+    document.getElementById('trSkor').innerHTML = URUTAN.map(function(k) {
+      var s = parseFloat(skor[k])||0;
+      var p = persen[k] !== undefined ? persen[k] : Math.round((s/MAKS)*100);
+      return '<td class="skor-' + k.toLowerCase() + '">' +
+        '<div class="skor-val">'+s+'</div>' +
+        '<div class="skor-pct">'+p+'%</div>' +
+      '</td>';
+    }).join('');
+  }
+
+  function renderRadar(skor) {
+    var cx = 210, cy = 190, r = 135;
+    var n  = URUTAN.length;
+    var svg = document.getElementById('radarSvg');
+    svg.innerHTML = '';
+
+    function angle(i) { return (Math.PI*2/n*i) - Math.PI/2; }
+    function pt(i, frac) {
+      return { x: cx + r*frac*Math.cos(angle(i)), y: cy + r*frac*Math.sin(angle(i)) };
+    }
+    function el(tag, attrs) {
+      var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.keys(attrs).forEach(function(k){ e.setAttribute(k, attrs[k]); });
+      return e;
+    }
+
+    // Grid level
+    [.2,.4,.6,.8,1].forEach(function(lv) {
+      var pts = URUTAN.map(function(_,i){ var p=pt(i,lv); return p.x+','+p.y; }).join(' ');
+      svg.appendChild(el('polygon',{points:pts,fill:'none',stroke:'#D1D5DB','stroke-width':'1'}));
+    });
+
+    URUTAN.forEach(function(_,i){
+      var p = pt(i,1);
+      svg.appendChild(el('line',{x1:cx,y1:cy,x2:p.x,y2:p.y,stroke:'#D1D5DB','stroke-width':'1'}));
+    });
+
+    [0.2, 0.4, 0.6, 0.8, 1.0].forEach(function(val, idx){
+      var p = pt(0, val);
+      var t = el('text',{x:p.x+4,y:p.y+3,'font-size':'9',fill:'#6B7280','font-family':'Inter,sans-serif'});
+      t.textContent = val.toFixed(1); svg.appendChild(t);
+    });
+
+    var frac = URUTAN.map(function(k){ return Math.min((parseFloat(skor[k])||0)/MAKS,1); });
+    var pts  = URUTAN.map(function(k,i){ var p=pt(i,frac[i]); return p.x+','+p.y; }).join(' ');
+    svg.appendChild(el('polygon',{points:pts,fill:'rgba(243, 156, 18, 0.35)',stroke:'#D35400','stroke-width':'2.5','stroke-linejoin':'round'}));
+
+    URUTAN.forEach(function(k,i){
+      var p = pt(i,frac[i]);
+      svg.appendChild(el('circle',{cx:p.x,cy:p.y,r:'5',fill:'#D35400',stroke:'white','stroke-width':'1.5'}));
+    });
+
+    URUTAN.forEach(function(k,i){
+      var lp = { x: cx+(r+24)*Math.cos(angle(i)), y: cy+(r+24)*Math.sin(angle(i)) };
+      var anchor = Math.cos(angle(i))>0.3?'start':Math.cos(angle(i))<-0.3?'end':'middle';
+
+      var tK = el('text',{x:lp.x,y:lp.y-5,'text-anchor':anchor,'font-size':'11','font-weight':'800',fill:'#1F2937','font-family':'Inter,sans-serif'});
+      tK.textContent = BIDANG[k].label; svg.appendChild(tK);
+
+      var tS = el('text',{x:lp.x,y:lp.y+9,'text-anchor':anchor,'font-size':'9','font-weight':'700',fill:'#D35400','font-family':'Inter,sans-serif'});
+      tS.textContent = (parseFloat(skor[k])||0)+' / '+MAKS; svg.appendChild(tS);
+    });
+
+    svg.appendChild(el('circle',{cx:cx,cy:cy,r:'3',fill:'#9CA3AF'}));
+
+    document.getElementById('radarLegend').innerHTML = URUTAN.map(function(k){
+      var s = parseFloat(skor[k])||0;
+      var p = Math.round((s/MAKS)*100);
+      return '<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;background:'+BIDANG[k].bg+';border:1px solid '+BIDANG[k].warna+'44;font-size:11px;font-weight:600;color:'+BIDANG[k].warna+'">' +
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+BIDANG[k].warna+';display:inline-block;"></span>' +
+        k+' '+BIDANG[k].label+': '+s+' ('+p+'%)' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderDimensiList(ranked, skor) {
+    var max = ranked[0] ? Math.max(ranked[0].skor,1) : 1;
+    document.getElementById('dimensiList').innerHTML = ranked.map(function(item) {
+      var k = item.kode, b = BIDANG[k]||{};
+      var s = parseFloat(skor[k])||0;
+      var pct = Math.round((s/MAKS)*100);
+      var pctBar = Math.round((s/max)*100);
+      return '<div class="dimensi-row">' +
+        '<div class="dimensi-kode" style="background:'+b.warna+'">'+k+'</div>' +
+        '<div class="dimensi-info">' +
+          '<div class="dimensi-nama">'+(b.label||item.bidang)+' ('+(b.nama||'')+')</div>' +
+          '<div class="dimensi-bar-bg"><div class="dimensi-bar-fill" style="width:'+pctBar+'%;background:'+b.warna+'"></div></div>' +
+        '</div>' +
+        '<div class="dimensi-angka">' +
+          '<div class="dimensi-skor">'+s+'</div>' +
+          '<div class="dimensi-pct">'+pct+'%</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderRekapGrid(rekap) {
+    document.getElementById('rekapGrid').innerHTML = URUTAN.map(function(k) {
+      var r = rekap[k] || {ya:0,tidak:0,total:0};
+      var b = BIDANG[k] || {};
+      return '<div class="rekap-card" style="border-top:3px solid '+b.warna+'">' +
+        '<div class="rekap-kode" style="color:'+b.warna+'">'+k+'</div>' +
+        '<div style="font-size:11px;color:var(--gray-500);margin-bottom:4px;">'+b.label+'</div>' +
+        '<div class="rekap-ya">'+r.ya+' Ya</div>' +
+        '<div class="rekap-total">'+r.tidak+' Tidak / '+r.total+' soal</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderDetailJawaban(jawaban) {
+    document.getElementById('bodyJawaban').innerHTML = jawaban.map(function(j, i) {
+      var b = BIDANG[j.kode] || {};
+      var isYa = parseFloat(j.nilai) > 0;
+      return '<tr>' +
+        '<td style="color:var(--gray-400);font-size:11px;">'+(i+1)+'</td>' +
+        '<td><span class="mono" style="font-size:11px;">'+esc(j.idSoal)+'</span></td>' +
+        '<td style="font-size:12px;max-width:320px;">'+esc(j.teks)+'</td>' +
+        '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:'+b.bg+';color:'+b.warna+'">'+esc(j.kode)+'</span></td>' +
+        '<td class="'+(isYa?'jwb-ya':'jwb-tidak')+'">'+(isYa?'Ya':'Tidak')+'</td>' +
+        '<td style="text-align:center;font-weight:700;">'+(parseFloat(j.nilai)||0)+'</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function toggleDetail() {
+    detailTerbuka = !detailTerbuka;
+    document.getElementById('detailJawabanWrap').classList.toggle('hidden', !detailTerbuka);
+    document.getElementById('detailToggleLabel').textContent = detailTerbuka ? 'Sembunyikan' : 'Tampilkan';
+    document.querySelector('#detailToggleIcon use').setAttribute('href', detailTerbuka ? '#i-chevron-up' : '#i-chevron-down');
+  }
+
+  function rChip(teks) {
+    return '<div class="report-chip"><svg class="icon icon-xs"><use href="#i-tag"/></svg>'+esc(teks)+'</div>';
+  }
+  function infoBox(label, nilai) {
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--gray-100);">' +
+      '<div style="font-size:10px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">'+label+'</div>' +
+      '<div style="font-size:13px;font-weight:600;color:var(--gray-800);">'+esc(nilai)+'</div>' +
+    '</div>';
+  }
+  function navigasiKe(url) {
+    try {
+      var a = document.createElement('a');
+      a.href = url;
+      a.target = '_top';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { if (a && a.parentNode) a.parentNode.removeChild(a); }, 500);
+      return;
+    } catch(e) {}
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch(e) {}
+    window.location.href = url;
+  }
+
+  function kembali() {
+    if (sessionStorage.getItem('fomo_admin')) {
+      navigasiKe('<?= ScriptApp.getService().getUrl() ?>?page=admin');
+    } else {
+      navigasiKe('<?= ScriptApp.getService().getUrl() ?>?page=laporan');
+    }
+  }
+  function setLoading(show, text) {
+    var o = document.getElementById('loadingOverlay');
+    if (show) { o.classList.remove('hidden'); if(text) document.getElementById('loadingText').textContent=text; }
+    else o.classList.add('hidden');
+  }
+  function esc(s) {
+    return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+  }
+</script>
+</body>
+</html>

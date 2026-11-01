@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <base target="_top"/>
+  <title>REPORT HOLLAND TEST (RIASEC)</title>
+  <?!= include('CSS'); ?>
+  <style>
+    /* ---- Tema Excel Report Holland ---- */
+    .excel-report-card {
+      background: #FFFFFF;
+      border: 1.5px solid #D1D5DB;
+      border-radius: var(--r-lg);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .excel-banner-header {
+      background: linear-gradient(135deg, #F39C12 0%, #D35400 100%);
+      color: #FFFFFF;
+      text-align: center;
+      padding: 18px 20px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      box-shadow: inset 0 -2px 6px rgba(0,0,0,0.15);
+    }
+
+    .biodata-grid-excel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 24px;
+      padding: 20px 24px;
+      background: #FAFAFA;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 14px;
+    }
+
+    .bio-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .bio-lbl {
+      width: 110px;
+      color: #374151;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .bio-sep {
+      color: #6B7280;
+      margin-right: 4px;
+    }
+    .bio-val {
+      color: #111827;
+      font-weight: 700;
+    }
+
+    .skor-section {
+      padding: 20px 24px;
+    }
+    .section-subtitle {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1F2937;
+      margin-bottom: 14px;
+    }
+
+    /* Tabel skor gaya Excel */
+    .tabel-riasec-excel {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      margin-bottom: 24px;
+      border: 1px solid #E5E7EB;
+    }
+    .tabel-riasec-excel th.th-kode {
+      background: #FFEAA7;
+      color: #975A16;
+      font-weight: 800;
+      font-size: 16px;
+      padding: 10px;
+      border: 1px solid #E2E8F0;
+    }
+    .tabel-riasec-excel th.th-nama {
+      background: #FFF8E7;
+      color: #4A5568;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 8px;
+      border: 1px solid #E2E8F0;
+    }
+    .tabel-riasec-excel td.td-skor {
+      background: #FFFFFF;
+      color: #1A365D;
+      font-weight: 800;
+      font-size: 22px;
+      padding: 14px 8px;
+      border: 1px solid #E2E8F0;
+    }
+
+    /* Radar Chart Container */
+    .radar-box {
+      max-width: 440px;
+      margin: 0 auto 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Bagian Interpretasi */
+    .interpretasi-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: var(--r-md);
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+    .interpretasi-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1E293B;
+      margin-bottom: 12px;
+    }
+
+    .tipe-kombinasi-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #EFF6FF;
+      border: 1.5px solid #BFDBFE;
+      color: #1D4ED8;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .badge-konsistensi {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .kons-Tinggi { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; }
+    .kons-Sedang { background: #FEF9C3; color: #A16207; border: 1px solid #FDE047; }
+    .kons-Rendah { background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; }
+
+    .box-info-item {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .box-info-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748B;
+      margin-bottom: 6px;
+      letter-spacing: .5px;
+    }
+    .box-info-txt {
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    /* Print styling */
+    @media print {
+      .print-hide, .app-header, .aksi-bar { display: none !important; }
+      body { background: #FFFFFF; }
+      .excel-report-card { border: none; box-shadow: none; margin: 0; }
+      .excel-banner-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .tabel-riasec-excel th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    @media (max-width: 640px) {
+      .biodata-grid-excel { grid-template-columns: 1fr; gap: 8px; }
+      .tabel-riasec-excel td.td-skor { font-size: 16px; padding: 8px 4px; }
+      .tabel-riasec-excel th.th-nama { font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Memuat hasil Holland Test...</div>
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- HEADER APLIKASI -->
+<header class="app-header print-hide">
+  <div class="header-brand">
+    <span style="font-size:16px;font-weight:800;color:var(--blue-800);letter-spacing:-0.5px;">FOMO</span>
+    <div class="brand-sep"></div>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--gray-800);">Hasil Asesmen Minat Bakat</div>
+      <div style="font-size:11px;color:var(--gray-500);">Report Holland Test (RIASEC)</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary btn-sm" onclick="window.print()">
+      <svg class="icon icon-sm"><use href="#i-printer"/></svg> Cetak / Simpan PDF
+    </button>
+  </div>
+</header>
+
+<div class="page-content" style="max-width:880px;">
+
+  <!-- BAR AKSES ADMIN / PILIH SISWA -->
+  <div class="card print-hide hidden" id="adminSelectorBar" style="background:#EFF6FF;border:1.5px solid #93C5FD;margin-bottom:16px;">
+    <div class="card-body" style="padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:260px;">
+        <span style="font-size:12px;font-weight:700;color:#1E40AF;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <svg class="icon icon-sm" style="color:#2563EB;"><use href="#i-user"/></svg> Akses Admin:
+        </span>
+        <select id="selSiswaReport" class="form-control" style="font-weight:700;min-width:240px;height:38px;font-size:13px;color:#1E3A8A;background:#FFFFFF;border:1.5px solid #93C5FD;" onchange="muatHasil(this.value)">
+          <option value="">Memuat daftar siswa...</option>
+        </select>
+      </div>
+      <div>
+        <a href="<?= ScriptApp.getService().getUrl() ?>?page=admin" class="btn btn-secondary btn-sm" style="background:white;font-weight:700;color:#1E40AF;border:1px solid #BFDBFE;">
+          <svg class="icon icon-xs"><use href="#i-arrow-left"/></svg> Kembali ke Panel Admin
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="memuatState">
+    <div class="card"><div class="card-body text-center" style="padding:48px;">
+      <div class="spinner" style="margin:0 auto 14px;"></div>
+      <div style="font-size:14px;color:var(--gray-600);font-weight:500;">Menyiapkan Report Holland Test...</div>
+    </div></div>
+  </div>
+
+  <!-- HASIL UTAMA (GAYA EXCEL PERSIS) -->
+  <div class="hidden" id="hasilKonten">
+
+    <div class="excel-report-card">
+      <!-- HEADER BANNER ORANGE -->
+      <div class="excel-banner-header">
+        REPORT HOLLAND TEST (RIASEC)
+      </div>
+
+      <!-- BIODATA PESERTA -->
+      <div class="biodata-grid-excel">
+        <div class="bio-item">
+          <span class="bio-lbl">Nama</span>
+          <span class="bio-sep">:</span>
+          <span class="bio-val" id="rNama">—</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-lbl">Tanggal Lahir</span>
+          <span class="bio-sep">:</span>
+          <span class="bio-val" id="rTglLahir">—</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-lbl">Jenis Kelamin</span>
+          <span class="bio-sep">:</span>
+          <span class="bio-val" id="rJK">—</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-lbl">Pendidikan</span>
+          <span class="bio-sep">:</span>
+          <span class="bio-val" id="rPendidikan">—</span>
+        </div>
+        <div class="bio-item" style="grid-column: 1 / -1;" id="rowSekolah">
+          <span class="bio-lbl">Asal Sekolah</span>
+          <span class="bio-sep">:</span>
+          <span class="bio-val" id="rSekolah">—</span>
+        </div>
+      </div>
+
+      <!-- SKOR JAWABAN -->
+      <div class="skor-section">
+        <div class="section-subtitle">Skor Jawaban:</div>
+
+        <table class="tabel-riasec-excel">
+          <thead>
+            <tr>
+              <th class="th-kode">R</th>
+              <th class="th-kode">I</th>
+              <th class="th-kode">A</th>
+              <th class="th-kode">S</th>
+              <th class="th-kode">E</th>
+              <th class="th-kode">C</th>
+            </tr>
+            <tr>
+              <th class="th-nama">Realistic</th>
+              <th class="th-nama">Investigative</th>
+              <th class="th-nama">Artistic</th>
+              <th class="th-nama">Social</th>
+              <th class="th-nama">Enterprising</th>
+              <th class="th-nama">Conventional</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-skor" id="skorR">0</td>
+              <td class="td-skor" id="skorI">0</td>
+              <td class="td-skor" id="skorA">0</td>
+              <td class="td-skor" id="skorS">0</td>
+              <td class="td-skor" id="skorE">0</td>
+              <td class="td-skor" id="skorC">0</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- RADAR CHART -->
+        <div class="radar-box">
+          <svg id="radarSvg" viewBox="0 0 400 360" width="100%" style="display:block;margin:0 auto;"></svg>
+          <div style="font-size:11px;color:#64748B;margin-top:8px;">Diagram Radar Minat RIASEC Holland (0 - 1.0)</div>
+        </div>
+
+        <!-- INTERPRETASI UMUM (Sesuai Referensi Excel) -->
+        <div class="interpretasi-card">
+          <div class="interpretasi-title">Interpretasi Umum:</div>
+
+          <div style="margin-bottom:14px;">
+            <div style="font-size:13px;color:#475569;margin-bottom:4px;font-weight:600;">Kombinasi Tipe Minat Tertinggi:</div>
+            <div class="tipe-kombinasi-badge" id="badgeHollandCode">RIA</div>
+            <div style="font-size:13px;color:#334155;" id="top3DetailText">—</div>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <span style="font-size:13px;font-weight:600;color:#475569;">Konsistensi : </span>
+            <span class="badge-konsistensi" id="badgeKonsistensi">Tinggi</span>
+          </div>
+
+          <div class="box-info-item">
+            <div class="box-info-lbl" id="lblKombinasiDesc">Profil &amp; Karakteristik Minat:</div>
+            <div class="box-info-txt" id="txtDeskripsi">—</div>
+          </div>
+
+          <div class="box-info-item">
+            <div class="box-info-lbl">Contoh Profesi Terkait:</div>
+            <div class="box-info-txt" id="txtProfesiTerkait" style="font-weight:500;">—</div>
+          </div>
+
+          <div class="box-info-item" style="background:#F0FDF4;border-color:#BBF7D0;">
+            <div class="box-info-lbl" style="color:#166534;">Berdasarkan Kombinasi Tipe Minat*:</div>
+            <div class="box-info-txt" id="txtKombinasiMulti" style="color:#14532D;white-space:pre-line;">—</div>
+            <div style="font-size:11px;color:#15803D;margin-top:8px;font-style:italic;">*Konsistensi harus tinggi atau sedang</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TOMBOL AKSI -->
+    <div class="card aksi-bar print-hide" style="margin-bottom:40px;">
+      <div class="card-body">
+        <div class="d-flex gap-3 flex-wrap">
+          <button class="btn btn-primary flex-1 btn-lg" onclick="window.print()">
+            <svg class="icon icon-sm"><use href="#i-printer"/></svg> Cetak / Simpan PDF
+          </button>
+          <button class="btn btn-secondary flex-1 btn-lg" onclick="salinHasil()">
+            <svg class="icon icon-sm"><use href="#i-copy"/></svg> Salin Ringkasan
+          </button>
+        </div>
+        <div class="mt-3">
+          <button class="btn btn-ghost btn-full" onclick="kembali()">
+            <svg class="icon icon-sm"><use href="#i-home"/></svg> Kembali ke Halaman Utama
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Error State -->
+  <div class="hidden" id="errorState">
+    <div class="card"><div class="card-body">
+      <div class="empty-state">
+        <svg class="icon icon-2xl empty-state-icon"><use href="#i-alert-circle"/></svg>
+        <div class="empty-state-title">Data Hasil Belum Tersedia</div>
+        <div class="empty-state-desc" id="errorMsg">Hasil asesmen untuk token ini belum ditemukan. Pastikan Anda telah menyelesaikan semua soal instrumen.</div>
+        <button class="btn btn-primary mt-4" onclick="kembali()">
+          <svg class="icon icon-sm"><use href="#i-home"/></svg> Kembali ke Login
+        </button>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<script>
+  var APP_URL = '<?= ScriptApp.getService().getUrl() ?>';
+  var dataHasil = null;
+
+  window.onload = function() {
+    var p = new URLSearchParams(window.location.search);
+    var token = p.get('token') || sessionStorage.getItem('fomo_token') || '';
+    var isAdmin = !!sessionStorage.getItem('fomo_admin') || p.get('admin') === 'true';
+
+    if (isAdmin) {
+      document.getElementById('adminSelectorBar').classList.remove('hidden');
+      muatDaftarSiswaSelector(token);
+    } else {
+      if (!token) {
+        // Cek data di database untuk menghindari redirect login yang tidak perlu
+        muatDaftarSiswaSelector('');
+        return;
+      }
+      muatHasil(token);
+    }
+  };
+
+  function muatDaftarSiswaSelector(targetToken) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res && res.data && res.data.length) {
+          document.getElementById('adminSelectorBar').classList.remove('hidden');
+          var sel = document.getElementById('selSiswaReport');
+          sel.innerHTML = res.data.map(function(d) {
+            var selected = (targetToken && d.token === targetToken) ? 'selected' : '';
+            return '<option value="' + esc(d.token) + '" ' + selected + '>' + esc(d.nama || 'Siswa') + ' (' + esc(d.token) + ' - ' + esc(d.top3Kode || '') + ')</option>';
+          }).join('');
+          
+          var tokToLoad = targetToken || res.data[0].token;
+          muatHasil(tokToLoad);
+        } else {
+          document.getElementById('memuatState').classList.add('hidden');
+          document.getElementById('errorState').classList.remove('hidden');
+          document.getElementById('errorMsg').textContent = 'Belum ada data siswa yang menyelesaikan tes di database.';
+        }
+      })
+      .withFailureHandler(function() {
+        if (targetToken) {
+          muatHasil(targetToken);
+        } else {
+          document.getElementById('memuatState').classList.add('hidden');
+          document.getElementById('errorState').classList.remove('hidden');
+        }
+      })
+      .getAllHasil('semua', 'semua');
+  }
+
+  function muatHasil(token, retryCount) {
+    if (!token) return;
+    retryCount = retryCount || 0;
+    document.getElementById('memuatState').classList.remove('hidden');
+    document.getElementById('hasilKonten').classList.add('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        document.getElementById('memuatState').classList.add('hidden');
+        if (!res || !res.skor) {
+          document.getElementById('errorState').classList.remove('hidden');
+          return;
+        }
+        dataHasil = res;
+        renderHasil(res);
+      })
+      .withFailureHandler(function(err) {
+        if (retryCount < 1) {
+          setTimeout(function() { muatHasil(token, retryCount + 1); }, 1200);
+          return;
+        }
+        document.getElementById('memuatState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('errorMsg').textContent = 'Koneksi terputus saat mengambil hasil. Silakan muat ulang halaman.';
+      })
+      .cekHasilByToken(token);
+  }
+
+  function renderHasil(res) {
+    document.getElementById('hasilKonten').classList.remove('hidden');
+
+    // 1. Biodata
+    document.getElementById('rNama').textContent = res.nama || res.token;
+    document.getElementById('rTglLahir').textContent = res.tanggalLahir || '00 Jan 1900';
+    document.getElementById('rJK').textContent = res.jenisKelamin || 'Laki-laki';
+    document.getElementById('rPendidikan').textContent = res.pendidikan || res.jenjang || 'SD';
+    if (res.sekolah) {
+      document.getElementById('rSekolah').textContent = res.sekolah;
+    } else {
+      document.getElementById('rowSekolah').style.display = 'none';
+    }
+
+    // 2. Skor Tabel
+    var s = res.skor || {};
+    var r = parseFloat(s.R) || 0;
+    var i = parseFloat(s.I) || 0;
+    var a = parseFloat(s.A) || 0;
+    var soc = parseFloat(s.S) || 0;
+    var e = parseFloat(s.E) || 0;
+    var c = parseFloat(s.C) || 0;
+
+    document.getElementById('skorR').textContent = r;
+    document.getElementById('skorI').textContent = i;
+    document.getElementById('skorA').textContent = a;
+    document.getElementById('skorS').textContent = soc;
+    document.getElementById('skorE').textContent = e;
+    document.getElementById('skorC').textContent = c;
+
+    // 3. Radar Chart (Exact Hexagon Holland)
+    renderRadarHexagon(s);
+
+    // 4. Interpretasi & Profesi (Sesuai Referensi)
+    var interp = res.interpretasi || {};
+    var top3 = res.top3Kode || 'RIA';
+    document.getElementById('badgeHollandCode').textContent = top3;
+
+    var detailText = '';
+    if (res.ranked && res.ranked.length >= 3) {
+      detailText = res.ranked[0].kode + ' (' + res.ranked[0].bidang + ' ' + res.ranked[0].skor + ')' +
+                   ' — ' + res.ranked[1].kode + ' (' + res.ranked[1].bidang + ' ' + res.ranked[1].skor + ')' +
+                   ' — ' + res.ranked[2].kode + ' (' + res.ranked[2].bidang + ' ' + res.ranked[2].skor + ')';
+    }
+    document.getElementById('top3DetailText').textContent = detailText;
+
+    var kons = interp.konsistensi || 'Sedang';
+    var kBadge = document.getElementById('badgeKonsistensi');
+    kBadge.textContent = kons;
+    kBadge.className = 'badge-konsistensi kons-' + kons;
+
+    document.getElementById('lblKombinasiDesc').textContent = 'Kombinasi ' + (interp.code2 || top3.slice(0,2)) + ' — Profil Minat:';
+    document.getElementById('txtDeskripsi').textContent = interp.deskripsi || 'Minat dominan pada bidang ' + (res.bidangUtama || 'Realistik');
+    document.getElementById('txtProfesiTerkait').textContent = interp.profesiTerkait || 'Insinyur, Teknisi, Peneliti, Desainer, Konselor, Pengusaha';
+
+    // Rekomendasi Kombinasi
+    var multiTxt = '';
+    if (interp.profesiKombinasi3) {
+      multiTxt += 'Kombinasi ' + interp.top3Kode + ' = ' + interp.profesiKombinasi3 + '\n\n';
+    }
+    if (interp.profesiKombinasi2) {
+      multiTxt += 'Kombinasi ' + interp.code2 + ' = ' + interp.profesiKombinasi2;
+    }
+    if (!multiTxt) {
+      multiTxt = 'Pilihan profesi spesifik sesuai bakat: ' + (interp.profesiTerkait || 'Tersedia di laporan lengkap.');
+    }
+    document.getElementById('txtKombinasiMulti').textContent = multiTxt;
+  }
+
+  // ============================================================
+  // DIAGRAM RADAR HEXAGON RIASEC (Persis Excel Chart)
+  // Urutan Sumbu: Realistic (Atas), Investigative, Artistic, Social, Enterprising, Conventional
+  // ============================================================
+  function renderRadarHexagon(skor) {
+    var URUTAN = [
+      { k: 'R', label: 'Realistic' },
+      { k: 'I', label: 'Investigative' },
+      { k: 'A', label: 'Artistic' },
+      { k: 'S', label: 'Social' },
+      { k: 'E', label: 'Enterprising' },
+      { k: 'C', label: 'Conventional' }
+    ];
+
+    var MAKS = 18; // 18 soal per kategori
+    var cx = 200, cy = 180, r = 125;
+    var n = URUTAN.length;
+    var svg = document.getElementById('radarSvg');
+    svg.innerHTML = '';
+
+    function angle(i) {
+      return (Math.PI * 2 / n * i) - (Math.PI / 2);
+    }
+    function pt(i, frac) {
+      return {
+        x: cx + r * frac * Math.cos(angle(i)),
+        y: cy + r * frac * Math.sin(angle(i))
+      };
+    }
+    function mk(tag, attrs) {
+      var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.keys(attrs).forEach(function(k){ el.setAttribute(k, attrs[k]); });
+      return el;
+    }
+
+    // Grid Jaring Hexagon (0.2, 0.4, 0.6, 0.8, 1.0)
+    var levels = [0.2, 0.4, 0.6, 0.8, 1.0];
+    levels.forEach(function(lv) {
+      var pts = URUTAN.map(function(_, i){ var p = pt(i, lv); return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+      svg.appendChild(mk('polygon', { points: pts, fill: 'none', stroke: '#D1D5DB', 'stroke-width': '1' }));
+    });
+
+    // Garis Sumbu Radial
+    URUTAN.forEach(function(_, i) {
+      var p = pt(i, 1.0);
+      svg.appendChild(mk('line', { x1: cx, y1: cy, x2: p.x.toFixed(1), y2: p.y.toFixed(1), stroke: '#D1D5DB', 'stroke-width': '1' }));
+    });
+
+    // Label Angka Skala (0.2, 0.4, 0.6, 0.8, 1.0)
+    [0.2, 0.4, 0.6, 0.8, 1.0].forEach(function(val) {
+      var p = pt(0, val);
+      var txt = mk('text', { x: (p.x + 4).toFixed(1), y: (p.y + 3).toFixed(1), 'font-size': '9', fill: '#6B7280', 'font-family': 'Inter,sans-serif', 'font-weight': '600' });
+      txt.textContent = val.toFixed(1);
+      svg.appendChild(txt);
+    });
+
+    // Poligon Nilai Peserta
+    var nilaiFrac = URUTAN.map(function(item) {
+      var val = parseFloat(skor[item.k]) || 0;
+      return Math.min(Math.max(val / MAKS, 0), 1.0);
+    });
+
+    var dataPoints = URUTAN.map(function(_, i) {
+      var p = pt(i, nilaiFrac[i]);
+      return p.x.toFixed(1) + ',' + p.y.toFixed(1);
+    }).join(' ');
+
+    // Area Fill
+    svg.appendChild(mk('polygon', {
+      points: dataPoints,
+      fill: 'rgba(243, 156, 18, 0.35)',
+      stroke: '#D35400',
+      'stroke-width': '2.5',
+      'stroke-linejoin': 'round'
+    }));
+
+    // Titik Titik Nilai
+    URUTAN.forEach(function(item, i) {
+      var p = pt(i, nilaiFrac[i]);
+      svg.appendChild(mk('circle', {
+        cx: p.x.toFixed(1),
+        cy: p.y.toFixed(1),
+        r: '5',
+        fill: '#D35400',
+        stroke: '#FFFFFF',
+        'stroke-width': '2'
+      }));
+    });
+
+    // Label Nama Sumbu
+    URUTAN.forEach(function(item, i) {
+      var labelRadius = r + 22;
+      var a = angle(i);
+      var lx = cx + labelRadius * Math.cos(a);
+      var ly = cy + labelRadius * Math.sin(a);
+
+      var anchor = 'middle';
+      if (Math.cos(a) > 0.3) anchor = 'start';
+      if (Math.cos(a) < -0.3) anchor = 'end';
+
+      var t = mk('text', {
+        x: lx.toFixed(1),
+        y: (ly + 4).toFixed(1),
+        'text-anchor': anchor,
+        'font-size': '11',
+        'font-weight': '700',
+        fill: '#1F2937',
+        'font-family': 'Inter,sans-serif'
+      });
+      t.textContent = item.label;
+      svg.appendChild(t);
+    });
+  }
+
+  function salinHasil() {
+    if (!dataHasil) return;
+    var teks = 'REPORT HOLLAND TEST (RIASEC)\n' +
+      'Nama: ' + (dataHasil.nama || '') + '\n' +
+      'Tanggal Lahir: ' + (dataHasil.tanggalLahir || '') + '\n' +
+      'Jenis Kelamin: ' + (dataHasil.jenisKelamin || '') + '\n' +
+      'Pendidikan: ' + (dataHasil.pendidikan || '') + '\n' +
+      'Kode Holland: ' + (dataHasil.top3Kode || '') + '\n' +
+      'Konsistensi: ' + ((dataHasil.interpretasi && dataHasil.interpretasi.konsistensi) || '') + '\n' +
+      'Skor R: ' + (dataHasil.skor.R || 0) + ' | I: ' + (dataHasil.skor.I || 0) + ' | A: ' + (dataHasil.skor.A || 0) +
+      ' | S: ' + (dataHasil.skor.S || 0) + ' | E: ' + (dataHasil.skor.E || 0) + ' | C: ' + (dataHasil.skor.C || 0) + '\n\n' +
+      'Deskripsi: ' + ((dataHasil.interpretasi && dataHasil.interpretasi.deskripsi) || '');
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(teks).then(function() {
+        showToast('Ringkasan hasil berhasil disalin!', 'success');
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = teks;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Ringkasan hasil berhasil disalin!', 'success');
+    }
+  }
+
+  function navigasiKe(url) {
+    try {
+      var a = document.createElement('a');
+      a.href = url;
+      a.target = '_top';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { if (a && a.parentNode) a.parentNode.removeChild(a); }, 500);
+      return;
+    } catch(e) {}
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch(e) {}
+    window.location.href = url;
+  }
+
+  function kembali() {
+    if (sessionStorage.getItem('fomo_admin')) {
+      navigasiKe(APP_URL + '?page=admin');
+    } else {
+      sessionStorage.clear();
+      navigasiKe(APP_URL + '?page=login');
+    }
+  }
+
+  function showToast(msg, type) {
+    var icons = { success:'i-check-circle', error:'i-alert-circle', info:'i-info', warning:'i-alert-tri' };
+    var t = document.createElement('div');
+    t.className = 'toast ' + (type || 'info');
+    t.innerHTML = '<svg class="icon icon-sm"><use href="#' + (icons[type] || 'i-info') + '"/></svg><span>' + msg + '</span>';
+    document.getElementById('toastWrap').appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+</script>
+</body>
+</html>

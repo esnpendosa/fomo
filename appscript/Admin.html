@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <base target="_top"/>
+  <title>FOMO — Panel Admin</title>
+  <?!= include('CSS'); ?>
+  <!-- SheetJS untuk baca/tulis Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    /* ---- Sidebar ---- */
+    .sidebar {
+      position: fixed; top:0; left:0; bottom:0; width:220px;
+      background: linear-gradient(180deg, var(--blue-900) 0%, var(--blue-800) 100%);
+      color: var(--white); display: flex; flex-direction: column;
+      z-index: 200; transition: transform var(--tr);
+    }
+    .sidebar.tutup { transform: translateX(-220px); }
+    .sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .sidebar-logo .nama  { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+    .sidebar-logo .sub   { font-size: 11px; opacity: .65; margin-top: 2px; }
+    .sidebar-logo .akun  { margin-top: 10px; font-size: 11px; background: rgba(255,255,255,.12); border-radius: var(--r-md); padding: 4px 10px; display: inline-block; }
+    .nav-menu { flex: 1; padding: 8px 0; overflow-y: auto; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 18px; cursor: pointer; font-size: 13px;
+      color: rgba(255,255,255,.75); transition: all var(--tr);
+      border-left: 3px solid transparent; font-weight: 500;
+    }
+    .nav-item:hover   { background: rgba(255,255,255,.08); color: var(--white); }
+    .nav-item.aktif   { background: rgba(255,255,255,.12); border-left-color: var(--white); color: var(--white); font-weight: 600; }
+    .nav-sep { border: none; border-top: 1px solid rgba(255,255,255,.1); margin: 6px 18px; }
+    .nav-keluar { padding: 14px 18px; }
+
+    /* ---- Layout utama ---- */
+    .konten-utama { margin-left: 220px; min-height: 100vh; background: var(--gray-100); transition: margin-left var(--tr); }
+    .konten-utama.penuh { margin-left: 0; }
+    .topbar { background: var(--white); padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-200); box-shadow: var(--shadow-xs); position: sticky; top:0; z-index:100; }
+    .topbar-judul { font-size: 14px; font-weight: 600; color: var(--gray-800); display: flex; align-items: center; gap: 10px; }
+    .overlay-mobile { display: none; position: fixed; inset:0; background: rgba(0,0,0,.4); z-index:190; }
+    .overlay-mobile.tampil { display: block; }
+    .tombol-hamburger { display: none; background: none; border: none; cursor: pointer; color: var(--gray-600); padding: 4px; border-radius: var(--r-sm); }
+    .tombol-hamburger:hover { background: var(--gray-100); }
+
+    /* ---- Konten halaman ---- */
+    .halaman { display: none; }
+    .halaman.aktif { display: block; animation: fadeIn .2s ease; }
+    .isi-halaman { padding: 20px; }
+
+    /* ---- Token ---- */
+    .token-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--blue-50); border: 1px solid var(--blue-100); color: var(--blue-700); padding: 5px 12px; border-radius: var(--r-md); font-size: 13px; font-weight: 700; letter-spacing: 1px; font-family: 'SF Mono','Fira Code',monospace; cursor: pointer; transition: background var(--tr); }
+    .token-chip:hover { background: var(--blue-100); }
+    .kotak-token { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--r-lg); padding: 14px; display: flex; flex-wrap: wrap; gap: 8px; max-height: 200px; overflow-y: auto; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+    /* ---- Import ---- */
+    .langkah-import { display: flex; gap: 12px; padding: 14px; background: var(--blue-50); border: 1px solid var(--blue-100); border-radius: var(--r-lg); margin-bottom: 12px; }
+    .langkah-num { width: 24px; height: 24px; border-radius: 50%; background: var(--blue-700); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .langkah-judul { font-size: 13px; font-weight: 600; color: var(--blue-800); margin-bottom: 3px; }
+    .langkah-desc  { font-size: 12px; color: var(--gray-600); line-height: 1.5; }
+
+    /* ---- Distribusi ---- */
+    .dist-bar-wrap { margin-bottom: 10px; }
+    .dist-bar-top  { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+    .dist-bar-bg   { height: 8px; background: var(--gray-200); border-radius: 999px; overflow: hidden; }
+    .dist-bar-fill { height: 100%; border-radius: 999px; transition: width .7s ease; }
+
+    /* ---- Excel Report Holland Modal Styling ---- */
+    .excel-report-card {
+      background: #FFFFFF;
+      border: 1.5px solid #D1D5DB;
+      border-radius: var(--r-lg);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .excel-banner-header {
+      background: linear-gradient(135deg, #F39C12 0%, #D35400 100%);
+      color: #FFFFFF;
+      text-align: center;
+      padding: 16px 20px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      box-shadow: inset 0 -2px 6px rgba(0,0,0,0.15);
+    }
+    .biodata-grid-excel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 20px;
+      padding: 16px 20px;
+      background: #FAFAFA;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 13px;
+    }
+    .bio-item { display: flex; align-items: baseline; gap: 8px; }
+    .bio-lbl { width: 110px; color: #374151; font-weight: 600; flex-shrink: 0; }
+    .bio-sep { color: #6B7280; margin-right: 4px; }
+    .bio-val { color: #111827; font-weight: 700; }
+    .skor-section { padding: 18px 20px; }
+    .section-subtitle { font-size: 15px; font-weight: 800; color: #1F2937; margin-bottom: 12px; }
+    .tabel-riasec-excel {
+      width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 18px; border: 1px solid #E5E7EB;
+    }
+    .tabel-riasec-excel th.th-kode {
+      background: #FFEAA7; color: #975A16; font-weight: 800; font-size: 15px; padding: 8px; border: 1px solid #E2E8F0;
+    }
+    .tabel-riasec-excel th.th-nama {
+      background: #FFF8E7; color: #4A5568; font-weight: 600; font-size: 11px; padding: 6px; border: 1px solid #E2E8F0;
+    }
+    .tabel-riasec-excel td.td-skor {
+      background: #FFFFFF; color: #1A365D; font-weight: 800; font-size: 18px; padding: 10px 6px; border: 1px solid #E2E8F0;
+    }
+    .radar-box { max-width: 440px; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; }
+    .interpretasi-card {
+      background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: var(--r-md); padding: 16px 18px; margin-top: 14px;
+    }
+    .badge-konsistensi { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .kons-Tinggi { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; }
+    .kons-Sedang { background: #FEF9C3; color: #A16207; border: 1px solid #FDE047; }
+    .kons-Rendah { background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; }
+    .box-info-item { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+    .box-info-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748B; margin-bottom: 4px; letter-spacing: .5px; }
+    .box-info-txt { font-size: 13px; color: #334155; line-height: 1.6; }
+
+    @media print {
+      body { background: white !important; margin: 0 !important; padding: 0 !important; }
+      body * { visibility: hidden !important; }
+      #modalReportHollandAdmin, #modalReportHollandAdmin * { visibility: visible !important; }
+      #modalReportHollandAdmin {
+        position: absolute !important; left: 0 !important; top: 0 !important;
+        width: 100% !important; height: auto !important; display: block !important;
+        background: white !important; z-index: 999999 !important; padding: 0 !important;
+      }
+      .modal-box {
+        max-width: 100% !important; width: 100% !important; box-shadow: none !important;
+        border: none !important; max-height: none !important; overflow: visible !important;
+      }
+      .modal-body { overflow: visible !important; padding: 0 !important; }
+      .modal-header, .modal-footer, .print-hide, .sidebar, .topbar { display: none !important; }
+      .excel-report-card { border: none !important; box-shadow: none !important; padding: 0 !important; }
+      .excel-banner-header { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .tabel-riasec-excel th, .tabel-riasec-excel td { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .badge-konsistensi { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;">
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Memuat data...</div>
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Overlay mobile -->
+<div class="overlay-mobile" id="overlayMobile" onclick="tutupSidebar()"></div>
+
+<!-- ======= SIDEBAR ======= -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="nama">FOMO</div>
+    <div class="sub">Panel Admin</div>
+    <div class="akun" id="akunAdmin">Admin</div>
+  </div>
+  <div class="nav-menu">
+    <div class="nav-item aktif" id="nav-dasbor" onclick="buka('dasbor')">
+      <svg class="icon icon-sm"><use href="#i-grid"/></svg> Dasbor
+    </div>
+    <div class="nav-item" id="nav-token" onclick="buka('token')">
+      <svg class="icon icon-sm"><use href="#i-key"/></svg> Kelola Token
+    </div>
+    <div class="nav-item" id="nav-soal" onclick="buka('soal')">
+      <svg class="icon icon-sm"><use href="#i-list"/></svg> Kelola Soal
+    </div>
+    <div class="nav-item" id="nav-laporan" onclick="buka('laporan')">
+      <svg class="icon icon-sm"><use href="#i-file-text"/></svg> Laporan Hasil
+    </div>
+    <hr class="nav-sep"/>
+    <div class="nav-item" id="nav-import" onclick="buka('import')">
+      <svg class="icon icon-sm"><use href="#i-upload-cloud"/></svg> Impor Soal Excel
+    </div>
+  </div>
+  <div class="nav-keluar">
+    <button class="btn btn-danger btn-full btn-sm" onclick="keluar()">
+      <svg class="icon icon-sm"><use href="#i-logout"/></svg> Keluar
+    </button>
+  </div>
+</nav>
+
+<!-- ======= KONTEN UTAMA ======= -->
+<div class="konten-utama" id="kontenUtama">
+  <div class="topbar">
+    <div class="topbar-judul">
+      <button class="tombol-hamburger" onclick="bukaSidebar()">
+        <svg class="icon icon-md"><use href="#i-menu"/></svg>
+      </button>
+      <span id="judulHalaman">Dasbor Admin</span>
+    </div>
+    <div class="d-flex gap-2 align-center">
+      <span style="font-size:11px;color:var(--gray-500);" id="tanggalTopbar"></span>
+      <button class="btn btn-primary btn-sm" onclick="buka('token')">
+        <svg class="icon icon-sm"><use href="#i-plus"/></svg> Token Baru
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== DASBOR ===== -->
+  <div class="halaman aktif" id="hal-dasbor">
+    <div class="isi-halaman">
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card" style="cursor:pointer;" onclick="buka('token')" title="Klik untuk kelola token"><div class="stat-card-icon" style="background:var(--blue-50);color:var(--blue-700);"><svg class="icon icon-sm"><use href="#i-key"/></svg></div><div class="stat-card-value" id="s-total">0</div><div class="stat-card-label">Total Token</div></div>
+        <div class="stat-card" style="cursor:pointer;" onclick="buka('token')" title="Klik untuk kelola token"><div class="stat-card-icon" style="background:var(--green-100);color:var(--green-700);"><svg class="icon icon-sm"><use href="#i-check-circle"/></svg></div><div class="stat-card-value" id="s-aktif">0</div><div class="stat-card-label">Token Aktif</div></div>
+        <div class="stat-card" style="cursor:pointer;" onclick="buka('token')" title="Klik untuk kelola token"><div class="stat-card-icon" style="background:var(--amber-100);color:var(--amber-700);"><svg class="icon icon-sm"><use href="#i-activity"/></svg></div><div class="stat-card-value" id="s-dipakai">0</div><div class="stat-card-label">Sudah Dipakai</div></div>
+        <div class="stat-card" style="cursor:pointer;" onclick="buka('laporan')" title="Klik untuk lihat laporan hasil"><div class="stat-card-icon" style="background:#EDE9FE;color:#7C3AED;"><svg class="icon icon-sm"><use href="#i-award"/></svg></div><div class="stat-card-value" id="s-selesai">0</div><div class="stat-card-label">Selesai Tes</div></div>
+        <div class="stat-card" style="cursor:pointer;" onclick="buka('soal')" title="Klik untuk kelola soal"><div class="stat-card-icon" style="background:var(--blue-50);color:var(--blue-700);"><svg class="icon icon-sm"><use href="#i-list"/></svg></div><div class="stat-card-value" id="s-soal">0</div><div class="stat-card-label">Total Soal</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="flex-wrap" id="gridDasbor">
+        <div class="card">
+          <div class="card-header"><div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-bar-chart"/></svg></div><span class="card-title">Distribusi Bidang Utama</span></div>
+          <div class="card-body" id="distribusiBidang"><div class="empty-state"><svg class="icon icon-lg empty-state-icon"><use href="#i-bar-chart"/></svg><div class="empty-state-desc">Belum ada data</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-users"/></svg></div><span class="card-title">Distribusi Jenjang</span></div>
+          <div class="card-body" id="distribusiJenjang"><div class="empty-state"><svg class="icon icon-lg empty-state-icon"><use href="#i-users"/></svg><div class="empty-state-desc">Belum ada data</div></div></div>
+        </div>
+      </div>
+      <div class="card mt-4">
+        <div class="card-header"><div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-zap"/></svg></div><span class="card-title">Aksi Cepat</span></div>
+        <div class="card-body">
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary btn-sm" onclick="buka('token')"><svg class="icon icon-sm"><use href="#i-key"/></svg> Buat Token</button>
+            <button class="btn btn-success btn-sm" onclick="buka('import')"><svg class="icon icon-sm"><use href="#i-upload-cloud"/></svg> Impor Soal</button>
+            <button class="btn btn-secondary btn-sm" onclick="buka('laporan')"><svg class="icon icon-sm"><use href="#i-file-text"/></svg> Lihat Laporan</button>
+            <button class="btn btn-ghost btn-sm" onclick="muatStatistik()"><svg class="icon icon-sm"><use href="#i-refresh"/></svg> Muat Ulang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KELOLA TOKEN ===== -->
+  <div class="halaman" id="hal-token">
+    <div class="isi-halaman">
+      <!-- Form generate token -->
+      <div class="card">
+        <div class="card-header"><div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-plus"/></svg></div><span class="card-title">Buat Token Baru</span></div>
+        <div class="card-body">
+          <div id="alertToken"></div>
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label class="form-label"><svg class="icon icon-xs"><use href="#i-graduation"/></svg> Jenjang</label>
+              <select id="genJenjang" class="form-control">
+                <option value="SEMUA">SEMUA — Semua Jenjang</option>
+                <option value="SD">SD — Sekolah Dasar</option>
+                <option value="TK">TK — Taman Kanak-Kanak</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label"><svg class="icon icon-xs"><use href="#i-building"/></svg> Nama Sekolah</label>
+              <input type="text" id="genSekolah" class="form-control" placeholder="Nama sekolah..."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label"><svg class="icon icon-xs"><use href="#i-hash"/></svg> Jumlah Token</label>
+              <input type="number" id="genJumlah" class="form-control" value="1" min="1" max="500"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><svg class="icon icon-xs"><use href="#i-user"/></svg> Nama Wali / Kelas (opsional)</label>
+            <input type="text" id="genWali" class="form-control" placeholder="Nama wali murid atau kelas..."/>
+          </div>
+          <button class="btn btn-primary" onclick="buatToken()" id="btnBuatToken">
+            <svg class="icon icon-sm"><use href="#i-zap"/></svg> Buat Token
+          </button>
+        </div>
+        <!-- Hasil token -->
+        <div class="hidden" id="hasilToken">
+          <div class="card-footer">
+            <div class="d-flex justify-between align-center mb-3">
+              <span style="font-size:13px;font-weight:600;color:var(--gray-700);" id="labelHasilToken">Token berhasil dibuat:</span>
+              <button class="btn btn-secondary btn-sm" onclick="salinSemuaToken()">
+                <svg class="icon icon-sm"><use href="#i-copy"/></svg> Salin Semua
+              </button>
+            </div>
+            <div class="kotak-token" id="daftarTokenBaru"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel token -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-table"/></svg></div>
+          <span class="card-title">Daftar Token</span>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="muatDaftarToken()">
+            <svg class="icon icon-sm"><use href="#i-refresh"/></svg>
+          </button>
+        </div>
+        <div class="card-body" style="padding:14px;">
+          <div class="filter-bar">
+            <div class="search-wrap">
+              <svg class="icon icon-sm search-ic"><use href="#i-search"/></svg>
+              <input type="text" class="search-input" id="cariToken" placeholder="Cari token atau sekolah..." oninput="filterToken()"/>
+            </div>
+            <select class="filter-select" id="filterJenjangToken" onchange="muatDaftarToken()">
+              <option value="semua">Semua Jenjang</option>
+              <option value="SEMUA">SEMUA</option>
+              <option value="SD">SD</option>
+              <option value="TK">TK</option>
+            </select>
+            <select class="filter-select" id="filterStatusToken" onchange="muatDaftarToken()">
+              <option value="semua">Semua Status</option>
+              <option value="aktif">Aktif</option>
+              <option value="dipakai">Dipakai</option>
+              <option value="nonaktif">Nonaktif</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="eksporTokenCSV()">
+              <svg class="icon icon-sm"><use href="#i-download"/></svg> Ekspor CSV
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>Token</th><th>Jenjang</th><th>Sekolah</th><th>Wali/Kelas</th><th>Status</th><th>Tgl Dibuat</th><th>Tgl Dipakai</th><th>Aksi</th></tr></thead>
+              <tbody id="bodyToken"><tr><td colspan="8" class="text-center" style="padding:28px;color:var(--gray-400);">Klik muat ulang untuk memuat data</td></tr></tbody>
+            </table>
+          </div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:8px;" id="infoToken">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KELOLA SOAL ===== -->
+  <div class="halaman" id="hal-soal">
+    <div class="isi-halaman">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-list"/></svg></div>
+          <span class="card-title">Daftar Soal</span>
+          <div class="d-flex gap-2" style="margin-left:auto;">
+            <button class="btn btn-primary btn-sm" onclick="bukaModalSoal('tambah')"><svg class="icon icon-sm"><use href="#i-plus"/></svg> Tambah Soal</button>
+            <button class="btn btn-ghost btn-sm" onclick="muatDaftarSoal()"><svg class="icon icon-sm"><use href="#i-refresh"/></svg></button>
+            <button class="btn btn-danger btn-sm" onclick="hapusSoalKonfirmasi()"><svg class="icon icon-sm"><use href="#i-trash"/></svg> Hapus Semua</button>
+            <button class="btn btn-success btn-sm" onclick="buka('import')"><svg class="icon icon-sm"><use href="#i-upload-cloud"/></svg> Impor</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:14px;">
+          <div class="filter-bar">
+            <div class="search-wrap">
+              <svg class="icon icon-sm search-ic"><use href="#i-search"/></svg>
+              <input type="text" class="search-input" id="cariSoal" placeholder="Cari teks soal..." oninput="filterSoal()"/>
+            </div>
+            <select class="filter-select" id="filterKodeSoal" onchange="filterSoal()">
+              <option value="semua">Semua Kode</option>
+              <option value="R">R — Realistik</option>
+              <option value="I">I — Sains</option>
+              <option value="A">A — Seni</option>
+              <option value="S">S — Sosial</option>
+              <option value="E">E — Bahasa</option>
+              <option value="C">C — Matematika</option>
+              
+            </select>
+            <select class="filter-select" id="filterJenjangSoal" onchange="filterSoal()">
+              <option value="semua">Semua Jenjang</option>
+              <option value="SD">SD</option>
+              <option value="TK">TK</option>
+              <option value="SEMUA">SEMUA</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>ID</th><th>Teks Soal</th><th>Kode</th><th>Bidang</th><th>Jenjang</th><th>Pilihan A</th><th>Pilihan B</th><th>Status</th><th>Aksi</th></tr></thead>
+              <tbody id="bodySoal"><tr><td colspan="10" class="text-center" style="padding:28px;color:var(--gray-400);">Klik tombol muat ulang untuk memuat data</td></tr></tbody>
+            </table>
+          </div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:8px;" id="infoSoal">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LAPORAN ===== -->
+  <div class="halaman" id="hal-laporan">
+    <div class="isi-halaman">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-file-text"/></svg></div>
+          <span class="card-title">Laporan Hasil Siswa</span>
+          <div class="d-flex gap-2" style="margin-left:auto;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="muatLaporan()" title="Muat Ulang"><svg class="icon icon-sm"><use href="#i-refresh"/></svg></button>
+            <button class="btn btn-primary btn-sm" onclick="eksporLaporanExcel()"><svg class="icon icon-sm"><use href="#i-download"/></svg> Download Excel Lengkap</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.open(APP_URL + '?page=hasil', '_blank')" title="Halaman Report Holland Test Penuh"><svg class="icon icon-sm"><use href="#i-bar-chart"/></svg> Halaman Report</button>
+            <button class="btn btn-ghost btn-sm" onclick="window.open(APP_URL + '?page=laporan-siswa', '_blank')" title="Halaman Detail 108 Soal"><svg class="icon icon-sm"><use href="#i-file-text"/></svg> Detail 108 Soal</button>
+            <button class="btn btn-success btn-sm" onclick="eksporLaporanCSV()"><svg class="icon icon-sm"><use href="#i-download"/></svg> Ekspor CSV</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:14px;">
+          <div class="filter-bar" style="flex-wrap:wrap;gap:10px;">
+            <div class="search-wrap" style="flex:1;min-width:200px;">
+              <svg class="icon icon-sm search-ic"><use href="#i-search"/></svg>
+              <input type="text" class="search-input" id="cariLaporan" placeholder="Cari nama atau token..." oninput="filterLaporan()"/>
+            </div>
+            <select class="filter-select" id="filterJenjangLap" onchange="muatLaporan()">
+              <option value="semua">Semua Jenjang</option>
+              <option value="SD">SD — Sekolah Dasar</option>
+              <option value="TK">TK — Taman Kanak-Kanak</option>
+              <option value="SEMUA">SEMUA / Umum</option>
+            </select>
+            <select class="filter-select" id="pilihSiswaReportDirect" onchange="if(this.value) bukaReportModal(this.value)" style="font-weight:700;color:var(--blue-800);background:#EFF6FF;border-color:#93C5FD;min-width:240px;">
+              <option value="">Lihat Report Holland Siswa...</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>Token</th><th>Nama Siswa</th><th>Pendidikan</th><th>Sekolah</th><th>R</th><th>I</th><th>A</th><th>S</th><th>E</th><th>C</th><th>Kode</th><th>Bidang Utama</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+              <tbody id="bodyLaporan"><tr><td colspan="15" class="text-center" style="padding:28px;color:var(--gray-400);">Klik tombol muat ulang untuk memuat data</td></tr></tbody>
+            </table>
+          </div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:8px;" id="infoLaporan">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== IMPOR SOAL ===== -->
+  <div class="halaman" id="hal-import">
+    <div class="isi-halaman">
+      <!-- Panduan -->
+      <div class="card">
+        <div class="card-header"><div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-book-open"/></svg></div><span class="card-title">Panduan Format Excel</span></div>
+        <div class="card-body">
+          <div class="langkah-import">
+            <div class="langkah-num">1</div>
+            <div>
+              <div class="langkah-judul">Siapkan file Excel (.xlsx atau .xls)</div>
+              <div class="langkah-desc">Buat sheet pertama dengan header pada baris pertama: teks_soal, kode_riasec, jenjang, opsi_a, opsi_b, nilai_a, nilai_b</div>
+            </div>
+          </div>
+          <div class="langkah-import">
+            <div class="langkah-num">2</div>
+            <div>
+              <div class="langkah-judul">Kode RIASEC yang berlaku: R, I, A, S, E, C, G</div>
+              <div class="langkah-desc">R=Realistik &nbsp;|&nbsp; I=Investigatif &nbsp;|&nbsp; A=Artistik &nbsp;|&nbsp; S=Sosial &nbsp;|&nbsp; E=Enterprising &nbsp;|&nbsp; C=Konvensional</div>
+            </div>
+          </div>
+          <div class="langkah-import">
+            <div class="langkah-num">3</div>
+            <div>
+              <div class="langkah-judul">Kolom Jenjang: SD, TK, atau SEMUA</div>
+              <div class="langkah-desc">SEMUA = soal tampil untuk semua jenjang. SD = khusus SD. TK = khusus TK.</div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button class="btn btn-secondary btn-sm" onclick="unggahTemplate()">
+              <svg class="icon icon-sm"><use href="#i-download"/></svg> Unduh Template Excel
+            </button>
+          </div>
+
+          <!-- Contoh format -->
+          <div class="mt-4">
+            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Contoh Isi Excel</div>
+            <div class="table-wrap">
+              <table class="data-table" style="font-size:12px;">
+                <thead><tr><th>teks_soal</th><th>kode_riasec</th><th>jenjang</th><th>opsi_a</th><th>opsi_b</th><th>nilai_a</th><th>nilai_b</th></tr></thead>
+                <tbody>
+                  <tr><td>Saya suka bermain bola</td><td>R</td><td>SEMUA</td><td>Ya, suka</td><td>Tidak suka</td><td>1</td><td>0</td></tr>
+                  <tr><td>Saya senang menggambar</td><td>A</td><td>SD</td><td>Ya, suka sekali</td><td>Biasa saja</td><td>1</td><td>0</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unggah -->
+      <div class="card">
+        <div class="card-header"><div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-upload-cloud"/></svg></div><span class="card-title">Unggah File Excel Soal</span></div>
+        <div class="card-body">
+          <div id="alertImport"></div>
+          <div class="upload-area" id="uploadArea"
+               onclick="document.getElementById('fileExcel').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleDrop(event)">
+            <svg class="icon icon-2xl upload-icon"><use href="#i-upload-cloud"/></svg>
+            <div class="upload-text">Klik atau seret file Excel ke sini</div>
+            <div class="upload-hint">Format: .xlsx atau .xls &nbsp;&bull;&nbsp; Maks 10 MB</div>
+          </div>
+          <input type="file" id="fileExcel" class="upload-input" accept=".xlsx,.xls" onchange="handlePilihFile(event)"/>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:14px;cursor:pointer;font-size:13px;color:var(--gray-700);">
+            <input type="checkbox" id="hapusLama" style="width:16px;height:16px;accent-color:var(--blue-700);"/>
+            Hapus soal lama sebelum impor (ganti semua)
+          </label>
+        </div>
+      </div>
+
+      <!-- Pratinjau -->
+      <div class="card hidden" id="kartuPratinjau">
+        <div class="card-header">
+          <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-table"/></svg></div>
+          <span class="card-title">Pratinjau — <span id="jmlPratinjau">0</span> soal ditemukan</span>
+        </div>
+        <div class="card-body" style="padding:14px;">
+          <div id="alertPratinjau"></div>
+          <div style="max-height:280px;overflow-y:auto;">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>#</th><th>Teks Soal</th><th>Kode</th><th>Bidang</th><th>Jenjang</th><th>Pilihan A</th><th>Pilihan B</th></tr></thead>
+                <tbody id="bodyPratinjau"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4 flex-wrap">
+            <button class="btn btn-success" onclick="prosesImpor()" id="btnImpor">
+              <svg class="icon icon-sm"><use href="#i-check"/></svg> Impor <span id="jmlImpor">0</span> Soal
+            </button>
+            <button class="btn btn-secondary" onclick="batalImpor()">
+              <svg class="icon icon-sm"><use href="#i-x"/></svg> Batal
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /konten-utama -->
+
+<script>
+  var KODE_BIDANG = {R:'Realistik',I:'Investigatif',A:'Artistik',S:'Sosial',E:'Enterprising',C:'Konvensional'};
+  var semuaToken = [], semuaSoal = [], semuaLaporan = [];
+  var tokenBaruDibuat = [];
+  var dataPratinjau = [];
+
+  // URL aplikasi
+  var APP_URL = '<?= ScriptApp.getService().getUrl() ?>';
+
+  // Helper navigasi bebas blank screen / iframe sandbox
+  function navigasiKe(url) {
+    try {
+      var a = document.createElement('a');
+      a.href = url;
+      a.target = '_top';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() {
+        if (a && a.parentNode) a.parentNode.removeChild(a);
+      }, 500);
+      return;
+    } catch(e) {}
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch(e) {}
+    window.location.href = url;
+  }
+
+  // ---- INISIALISASI ----
+  window.onload = function() {
+    var admin = sessionStorage.getItem('fomo_admin');
+    if (!admin) { navigasiKe(APP_URL + '?page=login'); return; }
+    document.getElementById('akunAdmin').textContent = admin;
+    document.getElementById('tanggalTopbar').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    muatStatistik();
+    muatDaftarToken();
+  };
+
+  // ---- NAVIGASI ----
+  function buka(hal) {
+    document.querySelectorAll('.halaman').forEach(function(el){ el.classList.remove('aktif'); });
+    document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('aktif'); });
+    document.getElementById('hal-' + hal).classList.add('aktif');
+    document.getElementById('nav-' + hal).classList.add('aktif');
+    var judul = {dasbor:'Dasbor Admin',token:'Kelola Token',soal:'Kelola Soal',laporan:'Laporan Hasil',import:'Impor Soal Excel'};
+    document.getElementById('judulHalaman').textContent = judul[hal] || 'Admin';
+    if (hal === 'soal'    && semuaSoal.length === 0)    muatDaftarSoal();
+    if (hal === 'laporan' && semuaLaporan.length === 0) muatLaporan();
+    tutupSidebar();
+  }
+
+  function bukaSidebar()  { document.getElementById('sidebar').classList.add('buka'); document.getElementById('overlayMobile').classList.add('tampil'); }
+  function tutupSidebar() { document.getElementById('sidebar').classList.remove('buka'); document.getElementById('overlayMobile').classList.remove('tampil'); }
+
+  // ---- STATISTIK ----
+  function muatStatistik() {
+    setLoading(true,'Memuat statistik...');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        if (!res || !res.success) return;
+        document.getElementById('s-total').textContent   = res.totalToken !== undefined ? res.totalToken : 0;
+        document.getElementById('s-aktif').textContent   = res.tokenAktif !== undefined ? res.tokenAktif : 0;
+        document.getElementById('s-dipakai').textContent = res.tokenDipakai !== undefined ? res.tokenDipakai : 0;
+        var selesai = res.totalSelesai !== undefined ? res.totalSelesai : (res.totalHasil !== undefined ? res.totalHasil : 0);
+        document.getElementById('s-selesai').textContent = selesai;
+        document.getElementById('s-soal').textContent    = res.totalSoal !== undefined ? res.totalSoal : 0;
+        renderDistribusiBidang(res.distribusiBidang, selesai);
+        renderDistribusiJenjang(res.distribusiJenjang);
+      })
+      .withFailureHandler(function(){ setLoading(false); })
+      .getStatistik();
+  }
+
+  function renderDistribusiBidang(data, total) {
+    var wrap = document.getElementById('distribusiBidang');
+    if (!data || total === 0) { wrap.innerHTML = '<div class="empty-state"><svg class="icon icon-lg empty-state-icon"><use href="#i-bar-chart"/></svg><div class="empty-state-desc">Belum ada data hasil</div></div>'; return; }
+    var warna = {Realistik:'#DC2626',Investigatif:'#1565C0',Artistik:'#7C3AED',Sosial:'#16A34A',Enterprising:'#D97706',Konvensional:'#0284C7'};
+    wrap.innerHTML = Object.keys(data).map(function(b) {
+      var n = data[b]||0, pct = total > 0 ? Math.round(n/total*100) : 0, w = warna[b]||'#1565C0';
+      return '<div class="dist-bar-wrap"><div class="dist-bar-top"><span style="font-weight:500;color:var(--gray-700);font-size:12px;">'+esc(b)+'</span><span style="color:var(--gray-500);font-size:12px;">'+n+' ('+pct+'%)</span></div><div class="dist-bar-bg"><div class="dist-bar-fill" style="width:'+pct+'%;background:'+w+'"></div></div></div>';
+    }).join('');
+  }
+
+  function renderDistribusiJenjang(data) {
+    var wrap = document.getElementById('distribusiJenjang');
+    if (!data) { wrap.innerHTML = '<div class="empty-state"><svg class="icon icon-lg empty-state-icon"><use href="#i-users"/></svg><div class="empty-state-desc">Belum ada data</div></div>'; return; }
+    var total = 0;
+    Object.keys(data).forEach(function(k){ total += (data[k] || 0); });
+    if (total === 0) { wrap.innerHTML = '<div class="empty-state"><svg class="icon icon-lg empty-state-icon"><use href="#i-users"/></svg><div class="empty-state-desc">Belum ada data</div></div>'; return; }
+    var warnaJen = { SD: '#1565C0', TK: '#DB2777', LAIN: '#4B5563' };
+    var html = '<div style="text-align:center;margin-bottom:14px;"><div style="font-size:28px;font-weight:800;color:var(--gray-900);">' + total + '</div><div style="font-size:12px;color:var(--gray-500);">Total Peserta Selesai</div></div>';
+    Object.keys(data).forEach(function(k) {
+      var n = data[k] || 0;
+      var pct = total > 0 ? Math.round((n / total) * 100) : 0;
+      var w = warnaJen[k] || '#1565C0';
+      html += '<div class="dist-bar-wrap"><div class="dist-bar-top"><span style="font-size:12px;font-weight:600;color:' + w + ';">' + esc(k) + '</span><span style="font-size:12px;color:var(--gray-500);">' + n + ' (' + pct + '%)</span></div><div class="dist-bar-bg"><div class="dist-bar-fill" style="width:' + pct + '%;background:' + w + ';"></div></div></div>';
+    });
+    wrap.innerHTML = html;
+  }
+
+  // ---- TOKEN ----
+  function buatToken() {
+    var jenjang = document.getElementById('genJenjang').value;
+    var sekolah = document.getElementById('genSekolah').value.trim();
+    var jumlah  = parseInt(document.getElementById('genJumlah').value);
+    var wali    = document.getElementById('genWali').value.trim();
+    if (!sekolah) { showAlert('alertToken','warning','Nama sekolah harus diisi.'); return; }
+    if (jumlah < 1 || jumlah > 500) { showAlert('alertToken','warning','Jumlah token antara 1 hingga 500.'); return; }
+    setLoading(true,'Membuat '+jumlah+' token...');
+    document.getElementById('btnBuatToken').disabled = true;
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false); document.getElementById('btnBuatToken').disabled = false;
+        if (!res.success) { showAlert('alertToken','error', res.message); return; }
+        tokenBaruDibuat = res.tokens;
+        document.getElementById('labelHasilToken').textContent = res.jumlah + ' token berhasil dibuat:';
+        document.getElementById('daftarTokenBaru').innerHTML = res.tokens.map(function(t){
+          return '<div class="token-chip" onclick="salinToken(\''+t+'\')">'+t+'</div>';
+        }).join('');
+        document.getElementById('hasilToken').classList.remove('hidden');
+        showToast(res.jumlah + ' token berhasil dibuat.','success');
+        muatDaftarToken();
+      })
+      .withFailureHandler(function(){ setLoading(false); document.getElementById('btnBuatToken').disabled = false; showAlert('alertToken','error','Gagal membuat token.'); })
+      .generateToken(jumlah, jenjang, sekolah, wali);
+  }
+
+  function salinToken(t) { if (navigator.clipboard) navigator.clipboard.writeText(t); showToast('Token '+t+' disalin.','success'); }
+  function salinSemuaToken() { if (navigator.clipboard) navigator.clipboard.writeText(tokenBaruDibuat.join('\n')).then(function(){ showToast('Semua token disalin.','success'); }); }
+
+  function muatDaftarToken() {
+    document.getElementById('bodyToken').innerHTML = '<tr><td colspan="8" class="text-center" style="padding:24px;color:var(--gray-400);">Memuat...</td></tr>';
+    google.script.run
+      .withSuccessHandler(function(res) {
+        semuaToken = res.data || [];
+        renderTabelToken(semuaToken);
+        document.getElementById('infoToken').textContent = 'Total: ' + semuaToken.length + ' token';
+      })
+      .withFailureHandler(function(){ showToast('Gagal memuat token.','error'); })
+      .getAllToken(document.getElementById('filterJenjangToken').value, document.getElementById('filterStatusToken').value);
+  }
+
+  function renderTabelToken(data) {
+    var body = document.getElementById('bodyToken');
+    if (!data.length) { body.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:28px;color:var(--gray-400);">Tidak ada data.</td></tr>'; return; }
+    var url = '<?= ScriptApp.getService().getUrl() ?>';
+    body.innerHTML = data.map(function(r,i) {
+      var sBadge = r.status === 'aktif' ? 'badge-success' : r.status === 'dipakai' ? 'badge-primary' : 'badge-danger';
+      var jBadge = r.jenjang === 'SD' ? 'badge-primary' : r.jenjang === 'TK' ? 'badge-warning' : 'badge-success';
+      var tokenEnc = esc(r.token);
+      // Tombol aksi CRUD lengkap
+      var aksi =
+        '<div class="d-flex gap-1">' +
+          '<button class="btn btn-ghost btn-icon-sm" title="Salin Token" onclick="salinToken(\''+tokenEnc+'\')"><svg class="icon icon-sm"><use href="#i-copy"/></svg></button>' +
+          '<button class="btn btn-ghost btn-icon-sm" title="Edit Token" onclick="bukaModalEdit(\''+tokenEnc+'\')"><svg class="icon icon-sm" style="color:var(--blue-600);"><use href="#i-pencil"/></svg></button>';
+      if (r.status === 'nonaktif') {
+        aksi += '<button class="btn btn-ghost btn-icon-sm" title="Aktifkan" onclick="aktifkanToken(\''+tokenEnc+'\')"><svg class="icon icon-sm" style="color:var(--green-600);"><use href="#i-check-circle"/></svg></button>';
+      } else {
+        aksi += '<button class="btn btn-ghost btn-icon-sm" title="Nonaktifkan" onclick="nonaktifkanToken(\''+tokenEnc+'\')"><svg class="icon icon-sm" style="color:var(--amber-600);"><use href="#i-x"/></svg></button>';
+      }
+      aksi += '<button class="btn btn-ghost btn-icon-sm" title="Reset Tes / Ulangi" onclick="resetTokenAdmin(\''+tokenEnc+'\')"><svg class="icon icon-sm" style="color:var(--amber-600);"><use href="#i-refresh"/></svg></button>' +
+        '<button class="btn btn-ghost btn-icon-sm" title="Hapus Permanen" onclick="hapusTokenPermanen(\''+tokenEnc+'\')"><svg class="icon icon-sm" style="color:var(--red-600);"><use href="#i-trash"/></svg></button>' +
+        '</div>';
+
+      return '<tr>' +
+        '<td style="color:var(--gray-400);font-size:12px;">'+(i+1)+'</td>'+
+        '<td><span class="mono" style="font-size:12px;font-weight:700;color:var(--blue-700);">'+tokenEnc+'</span></td>'+
+        '<td><span class="badge '+jBadge+'"><span class="badge-dot"></span>'+esc(r.jenjang)+'</span></td>'+
+        '<td style="font-size:12px;">'+esc(r.sekolah||'—')+'</td>'+
+        '<td style="font-size:12px;">'+esc(r.namaWali||'—')+'</td>'+
+        '<td><span class="badge '+sBadge+'"><span class="badge-dot"></span>'+esc(r.status)+'</span></td>'+
+        '<td style="font-size:11px;color:var(--gray-500);">'+esc(r.tglDibuat||'—')+'</td>'+
+        '<td style="font-size:11px;color:var(--gray-500);">'+esc(r.tglDipakai||'—')+'</td>'+
+        '<td>'+aksi+'</td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  // ---- MODAL EDIT TOKEN ----
+  var tokenSedangDiedit = '';
+
+  function bukaModalEdit(token) {
+    var r = semuaToken.find(function(x){ return x.token === token; });
+    if (!r) return;
+    tokenSedangDiedit = token;
+    document.getElementById('editToken').value    = token;
+    document.getElementById('editJenjang').value  = r.jenjang || 'SD';
+    document.getElementById('editSekolah').value  = r.sekolah || '';
+    document.getElementById('editWali').value     = r.namaWali || '';
+    document.getElementById('editStatus').value   = r.status || 'aktif';
+    document.getElementById('modalEditToken').classList.remove('hidden');
+  }
+
+  function tutupModalEdit() {
+    document.getElementById('modalEditToken').classList.add('hidden');
+    tokenSedangDiedit = '';
+  }
+
+  function simpanEditToken() {
+    if (!tokenSedangDiedit) return;
+    var dataUpdate = {
+      jenjang : document.getElementById('editJenjang').value,
+      sekolah : document.getElementById('editSekolah').value.trim(),
+      namaWali: document.getElementById('editWali').value.trim(),
+      status  : document.getElementById('editStatus').value
+    };
+    if (!dataUpdate.sekolah) { showAlert('alertEditToken','warning','Nama sekolah harus diisi.'); return; }
+    setLoading(true,'Menyimpan perubahan...');
+    document.getElementById('btnSimpanEdit').disabled = true;
+    google.script.run
+      .withSuccessHandler(function(res){
+        setLoading(false);
+        document.getElementById('btnSimpanEdit').disabled = false;
+        if (!res.success) { showAlert('alertEditToken','error', res.message); return; }
+        tutupModalEdit();
+        showToast('Token berhasil diperbarui.','success');
+        muatDaftarToken();
+      })
+      .withFailureHandler(function(){
+        setLoading(false);
+        document.getElementById('btnSimpanEdit').disabled = false;
+        showAlert('alertEditToken','error','Gagal menyimpan.');
+      })
+      .updateToken(tokenSedangDiedit, dataUpdate);
+  }
+
+  // ---- HAPUS PERMANEN ----
+  function hapusTokenPermanen(token) {
+    if (!confirm('Hapus PERMANEN token ' + token + '?\n\nData tidak dapat dikembalikan.')) return;
+    setLoading(true,'Menghapus...');
+    google.script.run
+      .withSuccessHandler(function(res){
+        setLoading(false);
+        if (res.success) { showToast(res.message,'success'); muatDaftarToken(); }
+        else showToast('Gagal: '+res.message,'error');
+      })
+      .withFailureHandler(function(){ setLoading(false); showToast('Gagal menghapus.','error'); })
+      .hapusTokenPermanen(token);
+  }
+
+  // ---- RESET TOKEN (ADMIN) ----
+  function resetTokenAdmin(token) {
+    if (!confirm('Reset token ' + token + ' agar bisa mengerjakan tes ulang dari awal?\n\nHasil dan jawaban lama untuk token ini akan dihapus.')) return;
+    setLoading(true, 'Mereset token...');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        if (res.success) {
+          showToast(res.message, 'success');
+          muatDaftarToken();
+          muatStatistik();
+        } else {
+          showToast('Gagal: ' + res.message, 'error');
+        }
+      })
+      .withFailureHandler(function(err) {
+        setLoading(false);
+        showToast('Gagal: ' + (err.message || ''), 'error');
+      })
+      .resetToken(token);
+  }
+
+  // ---- AKTIFKAN TOKEN ----
+  function aktifkanToken(token) {
+    setLoading(true,'Mengaktifkan...');
+    google.script.run
+      .withSuccessHandler(function(res){
+        setLoading(false);
+        showToast('Token ' + token + ' diaktifkan.','success');
+        muatDaftarToken();
+      })
+      .withFailureHandler(function(){ setLoading(false); showToast('Gagal.','error'); })
+      .aktifkanToken(token);
+  }
+
+  function filterToken() {
+    var q = document.getElementById('cariToken').value.toLowerCase();
+    renderTabelToken(semuaToken.filter(function(r){ return (r.token||'').toLowerCase().includes(q)||(r.sekolah||'').toLowerCase().includes(q)||(r.namaWali||'').toLowerCase().includes(q); }));
+  }
+
+  function nonaktifkanToken(token) {
+    if (!confirm('Nonaktifkan token ' + token + '?')) return;
+    setLoading(true,'Menonaktifkan...');
+    google.script.run.withSuccessHandler(function(){ setLoading(false); showToast('Token dinonaktifkan.','success'); muatDaftarToken(); })
+      .withFailureHandler(function(){ setLoading(false); }).nonaktifkanToken(token);
+  }
+  function eksporTokenCSV() {
+    if (!semuaToken.length) { showToast('Tidak ada data.','warning'); return; }
+    var h = 'Token,Jenjang,Sekolah,Status,Tgl_Dibuat,Tgl_Dipakai\n';
+    var r = semuaToken.map(function(x){ return [x.token,x.jenjang,x.sekolah,x.status,x.tglDibuat,x.tglDipakai].join(','); }).join('\n');
+    unduhCSV('token_fomo.csv', h+r); showToast('CSV token berhasil diunduh.','success');
+  }
+
+  // ---- SOAL ----
+  function muatDaftarSoal() {
+    document.getElementById('bodySoal').innerHTML = '<tr><td colspan="10" class="text-center" style="padding:24px;color:var(--gray-400);">Memuat...</td></tr>';
+    google.script.run
+      .withSuccessHandler(function(res) {
+        semuaSoal = res.data || [];
+        renderTabelSoal(semuaSoal);
+        document.getElementById('infoSoal').textContent = 'Total: ' + semuaSoal.length + ' soal';
+      })
+      .withFailureHandler(function(){ showToast('Gagal memuat soal.','error'); })
+      .getAllSoal();
+  }
+
+  function renderTabelSoal(data) {
+    var body = document.getElementById('bodySoal');
+    if (!data.length) { body.innerHTML = '<tr><td colspan="10" class="text-center" style="padding:28px;color:var(--gray-400);">Tidak ada soal. Silakan tambah soal atau impor dari Excel.</td></tr>'; return; }
+    body.innerHTML = data.map(function(r,i) {
+      var bidang = KODE_BIDANG[r.kode] || r.kode;
+      var jBadge = r.jenjang === 'SD' ? 'badge-primary' : r.jenjang === 'TK' ? 'badge-warning' : 'badge-neutral';
+      var statusBadge = r.aktif === 'nonaktif' ? 'badge-danger' : 'badge-success';
+      return '<tr><td style="color:var(--gray-400);font-size:12px;">'+(i+1)+'</td>'+
+        '<td><span class="mono" style="font-size:11px;">'+esc(r.id)+'</span></td>'+
+        '<td style="max-width:240px;"><span class="truncate" style="display:block;font-size:12px;" title="'+esc(r.teks)+'">'+esc(r.teks)+'</span></td>'+
+        '<td><span class="badge badge-primary"><span class="badge-dot"></span>'+esc(r.kode)+'</span></td>'+
+        '<td style="font-size:12px;">'+esc(bidang)+'</td>'+
+        '<td><span class="badge '+jBadge+'">'+esc(r.jenjang)+'</span></td>'+
+        '<td style="font-size:11px;color:var(--gray-500);max-width:100px;" class="truncate">'+esc(r.opsiA)+'</td>'+
+        '<td style="font-size:11px;color:var(--gray-500);max-width:100px;" class="truncate">'+esc(r.opsiB)+'</td>'+
+        '<td><span class="badge '+statusBadge+'">'+esc(r.aktif || 'aktif')+'</span></td>'+
+        '<td style="white-space:nowrap;">'+
+          '<button class="btn btn-ghost btn-icon-sm" title="Edit Soal" onclick="bukaModalEditSoal(\''+esc(r.id)+'\')"><svg class="icon icon-xs"><use href="#i-pencil"/></svg></button>'+
+          '<button class="btn btn-ghost btn-icon-sm" style="color:var(--red-600);" title="Hapus Soal" onclick="hapusSoalSatu(\''+esc(r.id)+'\')"><svg class="icon icon-xs"><use href="#i-trash"/></svg></button>'+
+        '</td></tr>';
+    }).join('');
+  }
+
+  function filterSoal() {
+    var q = document.getElementById('cariSoal').value.toLowerCase();
+    var k = document.getElementById('filterKodeSoal').value;
+    var j = document.getElementById('filterJenjangSoal').value;
+    renderTabelSoal(semuaSoal.filter(function(r){ return (k==='semua'||r.kode===k) && (j==='semua'||r.jenjang===j) && ((r.teks||'').toLowerCase().includes(q)||(r.id||'').toLowerCase().includes(q)); }));
+  }
+
+  function hapusSoalKonfirmasi() {
+    if (!confirm('Hapus SEMUA soal?\n\nTindakan ini tidak dapat dibatalkan.')) return;
+    if (!confirm('Konfirmasi: hapus semua ' + semuaSoal.length + ' soal?')) return;
+    setLoading(true,'Menghapus semua soal...');
+    google.script.run.withSuccessHandler(function(res){ setLoading(false); if(res.success){ showToast('Semua soal dihapus.','success'); semuaSoal=[]; muatDaftarSoal(); } else showToast('Gagal: '+res.message,'error'); })
+      .withFailureHandler(function(){ setLoading(false); }).hapusSemuaSoal();
+  }
+
+  function bukaModalSoal(mode, id) {
+    mode = mode || 'tambah';
+    document.getElementById('soalMode').value = mode;
+    document.getElementById('alertModalSoal').innerHTML = '';
+
+    if (mode === 'tambah') {
+      document.getElementById('modalSoalTitle').innerHTML = '<svg class="icon icon-sm"><use href="#i-plus"/></svg> Tambah Soal Baru';
+      var nextNum = 1;
+      if (semuaSoal && semuaSoal.length) {
+        var ids = semuaSoal.map(function(s){
+          var m = String(s.id).match(/\d+/);
+          return m ? parseInt(m[0], 10) : 0;
+        });
+        nextNum = Math.max.apply(null, ids) + 1;
+      }
+      document.getElementById('soalId').value = 'S' + ('000' + nextNum).slice(-3);
+      document.getElementById('soalTeks').value = '';
+      document.getElementById('soalKode').value = 'R';
+      document.getElementById('soalJenjang').value = 'SEMUA';
+      document.getElementById('soalOpsiA').value = 'Ya';
+      document.getElementById('soalOpsiB').value = 'Tidak';
+      document.getElementById('soalAktif').value = 'aktif';
+    } else {
+      document.getElementById('modalSoalTitle').innerHTML = '<svg class="icon icon-sm"><use href="#i-pencil"/></svg> Edit Soal';
+      var s = semuaSoal.find(function(x){ return x.id === id; });
+      if (!s) { showToast('Soal tidak ditemukan.','error'); return; }
+      document.getElementById('soalId').value = s.id || '';
+      document.getElementById('soalTeks').value = s.teks || '';
+      document.getElementById('soalKode').value = (s.kode || 'R').toUpperCase();
+      document.getElementById('soalJenjang').value = (s.jenjang || 'SEMUA').toUpperCase();
+      document.getElementById('soalOpsiA').value = s.opsiA || 'Ya';
+      document.getElementById('soalOpsiB').value = s.opsiB || 'Tidak';
+      document.getElementById('soalAktif').value = s.aktif || 'aktif';
+    }
+
+    var m = document.getElementById('modalSoal');
+    m.classList.remove('hidden');
+    m.style.display = 'flex';
+    setTimeout(function(){ document.getElementById('soalTeks').focus(); }, 150);
+  }
+
+  function bukaModalEditSoal(id) {
+    bukaModalSoal('edit', id);
+  }
+
+  function tutupModalSoal() {
+    var m = document.getElementById('modalSoal');
+    m.classList.add('hidden');
+    m.style.display = 'none';
+  }
+
+  function simpanSoal() {
+    var mode = document.getElementById('soalMode').value;
+    var id = document.getElementById('soalId').value.trim();
+    var teks = document.getElementById('soalTeks').value.trim();
+    var kode = document.getElementById('soalKode').value.trim();
+    var jenjang = document.getElementById('soalJenjang').value.trim();
+    var opsiA = document.getElementById('soalOpsiA').value.trim() || 'Ya';
+    var opsiB = document.getElementById('soalOpsiB').value.trim() || 'Tidak';
+    var aktif = document.getElementById('soalAktif').value.trim() || 'aktif';
+
+    if (!teks) {
+      document.getElementById('alertModalSoal').innerHTML = '<div class="alert alert-danger mb-3">Teks soal tidak boleh kosong.</div>';
+      document.getElementById('soalTeks').focus();
+      return;
+    }
+
+    var dataSoal = {
+      id: id,
+      teks: teks,
+      kode: kode,
+      jenjang: jenjang,
+      opsiA: opsiA,
+      opsiB: opsiB,
+      nilaiA: 1,
+      nilaiB: 0,
+      aktif: aktif
+    };
+
+    setLoading(true, (mode === 'tambah' ? 'Menambahkan' : 'Menyimpan') + ' soal...');
+    document.getElementById('btnSimpanSoal').disabled = true;
+
+    var handler = google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        document.getElementById('btnSimpanSoal').disabled = false;
+        if (res.success) {
+          showToast(res.message || 'Soal berhasil disimpan.', 'success');
+          tutupModalSoal();
+          muatDaftarSoal();
+        } else {
+          document.getElementById('alertModalSoal').innerHTML = '<div class="alert alert-danger mb-3">' + esc(res.message || 'Gagal menyimpan.') + '</div>';
+        }
+      })
+      .withFailureHandler(function(err) {
+        setLoading(false);
+        document.getElementById('btnSimpanSoal').disabled = false;
+        document.getElementById('alertModalSoal').innerHTML = '<div class="alert alert-danger mb-3">Gagal: ' + esc(err.message || 'Koneksi error') + '</div>';
+      });
+
+    if (mode === 'tambah') {
+      handler.tambahSoal(dataSoal);
+    } else {
+      handler.updateSoal(id, dataSoal);
+    }
+  }
+
+  function hapusSoalSatu(id) {
+    var s = semuaSoal.find(function(x){ return x.id === id; });
+    var teks = s ? s.teks : id;
+    if (!confirm('Apakah Anda yakin ingin menghapus soal berikut?\n\nID: ' + id + '\nTeks: ' + teks.slice(0, 70) + (teks.length > 70 ? '...' : ''))) return;
+
+    setLoading(true, 'Menghapus soal ' + id + '...');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        if (res.success) {
+          showToast(res.message || 'Soal ' + id + ' berhasil dihapus.', 'success');
+          muatDaftarSoal();
+        } else {
+          showToast('Gagal: ' + (res.message || 'Gagal menghapus soal'), 'error');
+        }
+      })
+      .withFailureHandler(function(err) {
+        setLoading(false);
+        showToast('Gagal menghubungi server: ' + (err.message || ''), 'error');
+      })
+      .hapusSoal(id);
+  }
+
+  // ---- LAPORAN ----
+  function muatLaporan() {
+    document.getElementById('bodyLaporan').innerHTML = '<tr><td colspan="15" class="text-center" style="padding:24px;color:var(--gray-400);">Memuat...</td></tr>';
+    google.script.run
+      .withSuccessHandler(function(res) {
+        semuaLaporan = res.data || [];
+        renderTabelLaporan(semuaLaporan);
+        document.getElementById('infoLaporan').textContent = 'Total: ' + semuaLaporan.length + ' data';
+      })
+      .withFailureHandler(function(){ showToast('Gagal memuat laporan.','error'); })
+      .getAllHasil(document.getElementById('filterJenjangLap').value, 'semua');
+  }
+
+  function renderTabelLaporan(data) {
+    var body = document.getElementById('bodyLaporan');
+    var selectSiswa = document.getElementById('pilihSiswaReportDirect');
+    
+    // Update dropdown pilih siswa langsung
+    if (selectSiswa) {
+      var optHtml = '<option value="">Lihat Report Holland Siswa...</option>';
+      data.forEach(function(r) {
+        optHtml += '<option value="' + esc(r.token) + '">' + esc(r.nama || 'Siswa') + ' (' + esc(r.token) + ' - ' + esc(r.top3Kode || '') + ')</option>';
+      });
+      selectSiswa.innerHTML = optHtml;
+    }
+
+    if (!data.length) { body.innerHTML = '<tr><td colspan="15" class="text-center" style="padding:28px;color:var(--gray-400);">Tidak ada data hasil.</td></tr>'; return; }
+    var url = '<?= ScriptApp.getService().getUrl() ?>';
+    body.innerHTML = data.map(function(r,i) {
+      var s = r.skor || {};
+      return '<tr style="cursor:pointer;" onclick="bukaReportModal(\''+esc(r.token)+'\')">' +
+        '<td style="color:var(--gray-400);font-size:12px;">'+(i+1)+'</td>'+
+        '<td><span class="mono" style="font-size:11px;font-weight:700;color:var(--blue-700);">'+esc(r.token)+'</span></td>'+
+        '<td style="font-weight:700;font-size:13px;color:#111827;">'+esc(r.nama||'—')+'</td>'+
+        '<td style="font-size:12px;">'+esc(r.pendidikan||r.jenjang||'SD')+'</td>'+
+        '<td style="font-size:12px;" class="truncate">'+esc(r.sekolah||'—')+'</td>'+
+        '<td style="font-family:monospace;font-size:11px;font-weight:700;">'+(s.R||0)+'</td>'+
+        '<td style="font-family:monospace;font-size:11px;font-weight:700;">'+(s.I||0)+'</td>'+
+        '<td style="font-family:monospace;font-size:11px;font-weight:700;">'+(s.A||0)+'</td>'+
+        '<td style="font-family:monospace;font-size:11px;font-weight:700;">'+(s.S||0)+'</td>'+
+        '<td style="font-family:monospace;font-size:11px;font-weight:700;">'+(s.E||0)+'</td>'+
+        '<td style="font-family:monospace;font-size:11px;font-weight:700;">'+(s.C||0)+'</td>'+
+        '<td><span style="font-family:monospace;font-weight:800;color:#1D4ED8;background:#EFF6FF;padding:2px 6px;border-radius:4px;border:1px solid #BFDBFE;">'+esc(r.top3Kode||'—')+'</span></td>'+
+        '<td style="font-weight:600;color:var(--blue-700);font-size:12px;">'+esc(r.bidangUtama||'—')+'</td>'+
+        '<td style="font-size:11px;white-space:nowrap;color:var(--gray-500);">'+esc(r.timestamp||'—')+'</td>'+
+        '<td style="white-space:nowrap;"><div class="d-flex gap-1">' +
+          '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); bukaReportModal(\''+esc(r.token)+'\')" title="Buka Report Holland Persis Excel">' +
+            '<svg class="icon icon-xs"><use href="#i-eye"/></svg> Report Holland' +
+          '</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); window.open(\''+url+'?page=laporan-siswa&token='+encodeURIComponent(r.token)+'\',\'_blank\')" title="Laporan Detail 108 Soal">' +
+            '<svg class="icon icon-xs"><use href="#i-file-text"/></svg> 108 Soal' +
+          '</button>' +
+        '</div></td></tr>';
+    }).join('');
+  }
+
+  function filterLaporan() {
+    var q = document.getElementById('cariLaporan').value.toLowerCase();
+    renderTabelLaporan(semuaLaporan.filter(function(r){ return (r.nama||'').toLowerCase().includes(q)||(r.token||'').toLowerCase().includes(q)||(r.sekolah||'').toLowerCase().includes(q); }));
+  }
+
+  var dataReportTerpilih = null;
+
+  function bukaReportModal(token) {
+    if (!token) return;
+    setLoading(true, 'Mengambil Report Holland siswa...');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        if (!res || !res.skor) {
+          showToast('Data hasil tidak ditemukan untuk token ' + token, 'warning');
+          return;
+        }
+        dataReportTerpilih = res;
+        renderReportModal(res);
+      })
+      .withFailureHandler(function(err) {
+        setLoading(false);
+        showToast('Gagal memuat report: ' + (err.message || ''), 'error');
+      })
+      .cekHasilByToken(token);
+  }
+
+  function renderReportModal(res) {
+    document.getElementById('modalRepNama').textContent = res.nama || res.token;
+    var jk = res.jenisKelamin || 'Laki-laki';
+    if (!jk || !isNaN(jk) || (jk !== 'Perempuan' && jk !== 'Laki-laki')) {
+      jk = String(jk).toLowerCase().indexOf('p') === 0 ? 'Perempuan' : 'Laki-laki';
+    }
+    document.getElementById('modalRepJK').textContent = jk;
+    document.getElementById('modalRepPendidikan').textContent = res.pendidikan || res.jenjang || 'SD';
+    document.getElementById('modalRepSekolah').textContent = res.sekolah || '—';
+    document.getElementById('modalRepToken').textContent = res.token || '—';
+
+    var s = res.skor || {};
+    document.getElementById('modalRepSkorR').textContent = parseFloat(s.R) || 0;
+    document.getElementById('modalRepSkorI').textContent = parseFloat(s.I) || 0;
+    document.getElementById('modalRepSkorA').textContent = parseFloat(s.A) || 0;
+    document.getElementById('modalRepSkorS').textContent = parseFloat(s.S) || 0;
+    document.getElementById('modalRepSkorE').textContent = parseFloat(s.E) || 0;
+    document.getElementById('modalRepSkorC').textContent = parseFloat(s.C) || 0;
+
+    renderRadarHexagonModal(s);
+
+    var interp = res.interpretasi || {};
+    var top3 = res.top3Kode || 'RIA';
+    document.getElementById('modalRepKodeHolland').textContent = top3;
+
+    var detailText = '';
+    if (res.ranked && res.ranked.length >= 3) {
+      detailText = res.ranked[0].kode + ' (' + res.ranked[0].bidang + ' ' + res.ranked[0].skor + ')' +
+                   ' — ' + res.ranked[1].kode + ' (' + res.ranked[1].bidang + ' ' + res.ranked[1].skor + ')' +
+                   ' — ' + res.ranked[2].kode + ' (' + res.ranked[2].bidang + ' ' + res.ranked[2].skor + ')';
+    }
+    document.getElementById('modalRepTop3Detail').textContent = detailText;
+
+    var kons = interp.konsistensi || 'Sedang';
+    var kBadge = document.getElementById('modalRepKonsistensi');
+    kBadge.textContent = kons;
+    kBadge.className = 'badge-konsistensi kons-' + kons;
+
+    document.getElementById('modalRepDeskripsi').textContent = interp.deskripsi || ('Minat dominan pada bidang ' + (res.bidangUtama || 'Realistik'));
+    document.getElementById('modalRepProfesi').textContent = interp.profesiTerkait || 'Insinyur, Teknisi, Peneliti, Desainer, Konselor, Pengusaha';
+
+    var multiTxt = '';
+    if (interp.profesiKombinasi3) {
+      multiTxt += 'Kombinasi ' + interp.top3Kode + ' = ' + interp.profesiKombinasi3 + '\n\n';
+    }
+    if (interp.profesiKombinasi2) {
+      multiTxt += 'Kombinasi ' + interp.code2 + ' = ' + interp.profesiKombinasi2;
+    }
+    if (!multiTxt) {
+      multiTxt = interp.profesiTerkait || 'Tersedia di laporan lengkap.';
+    }
+    document.getElementById('modalRepKombinasiMulti').textContent = multiTxt;
+
+    var m = document.getElementById('modalReportHollandAdmin');
+    m.classList.remove('hidden');
+    m.style.display = 'flex';
+  }
+
+  function tutupReportModal() {
+    var m = document.getElementById('modalReportHollandAdmin');
+    m.classList.add('hidden');
+    m.style.display = 'none';
+  }
+
+  function renderRadarHexagonModal(skor) {
+    var URUTAN = [
+      { k: 'R', label: 'Realistic' },
+      { k: 'I', label: 'Investigative' },
+      { k: 'A', label: 'Artistic' },
+      { k: 'S', label: 'Social' },
+      { k: 'E', label: 'Enterprising' },
+      { k: 'C', label: 'Conventional' }
+    ];
+    var MAKS = 18;
+    var cx = 200, cy = 180, r = 125;
+    var n = URUTAN.length;
+    var svg = document.getElementById('radarSvgModal');
+    if (!svg) return;
+    svg.innerHTML = '';
+
+    function angle(i) { return (Math.PI * 2 / n * i) - (Math.PI / 2); }
+    function pt(i, frac) {
+      return { x: cx + r * frac * Math.cos(angle(i)), y: cy + r * frac * Math.sin(angle(i)) };
+    }
+    function mk(tag, attrs) {
+      var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.keys(attrs).forEach(function(k){ el.setAttribute(k, attrs[k]); });
+      return el;
+    }
+
+    [0.2, 0.4, 0.6, 0.8, 1.0].forEach(function(lv) {
+      var pts = URUTAN.map(function(_, i){ var p = pt(i, lv); return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+      svg.appendChild(mk('polygon', { points: pts, fill: 'none', stroke: '#D1D5DB', 'stroke-width': '1' }));
+    });
+
+    URUTAN.forEach(function(_, i) {
+      var p = pt(i, 1.0);
+      svg.appendChild(mk('line', { x1: cx, y1: cy, x2: p.x.toFixed(1), y2: p.y.toFixed(1), stroke: '#D1D5DB', 'stroke-width': '1' }));
+    });
+
+    [0.2, 0.4, 0.6, 0.8, 1.0].forEach(function(val) {
+      var p = pt(0, val);
+      var txt = mk('text', { x: (p.x + 4).toFixed(1), y: (p.y + 3).toFixed(1), 'font-size': '9', fill: '#6B7280', 'font-family': 'Inter,sans-serif', 'font-weight': '600' });
+      txt.textContent = val.toFixed(1);
+      svg.appendChild(txt);
+    });
+
+    var nilaiFrac = URUTAN.map(function(item) {
+      var val = parseFloat(skor[item.k]) || 0;
+      return Math.min(Math.max(val / MAKS, 0), 1.0);
+    });
+
+    var dataPoints = URUTAN.map(function(_, i) {
+      var p = pt(i, nilaiFrac[i]);
+      return p.x.toFixed(1) + ',' + p.y.toFixed(1);
+    }).join(' ');
+
+    svg.appendChild(mk('polygon', {
+      points: dataPoints,
+      fill: 'rgba(243, 156, 18, 0.35)',
+      stroke: '#D35400',
+      'stroke-width': '2.5',
+      'stroke-linejoin': 'round'
+    }));
+
+    URUTAN.forEach(function(item, i) {
+      var p = pt(i, nilaiFrac[i]);
+      svg.appendChild(mk('circle', {
+        cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: '5', fill: '#D35400', stroke: '#FFFFFF', 'stroke-width': '2'
+      }));
+    });
+
+    URUTAN.forEach(function(item, i) {
+      var a = angle(i);
+      var lx = cx + (r + 24) * Math.cos(a);
+      var ly = cy + (r + 24) * Math.sin(a);
+      var anc = (a > -Math.PI / 2 + 0.1 && a < Math.PI / 2 - 0.1) ? 'start' :
+                (a < -Math.PI / 2 - 0.1 || a > Math.PI / 2 + 0.1) ? 'end' : 'middle';
+      if (Math.abs(Math.cos(a)) < 0.15) anc = 'middle';
+      var txt = mk('text', {
+        x: lx.toFixed(1), y: ly.toFixed(1),
+        'text-anchor': anc, 'dominant-baseline': 'middle',
+        'font-size': '11', 'font-weight': '700', fill: '#1F2937', 'font-family': 'Inter,sans-serif'
+      });
+      txt.textContent = item.label;
+      svg.appendChild(txt);
+    });
+  }
+
+  function unduhExcelSiswaModal() {
+    if (!dataReportTerpilih) return;
+    var r = dataReportTerpilih;
+    var s = r.skor || {};
+    var rows = [
+      ['REPORT HOLLAND TEST (RIASEC)'],
+      [],
+      ['Nama Siswa', ':', r.nama || ''],
+      ['Jenis Kelamin', ':', r.jenisKelamin || 'Laki-laki'],
+      ['Tanggal Lahir', ':', r.tanggalLahir || ''],
+      ['Pendidikan', ':', r.pendidikan || r.jenjang || 'SD'],
+      ['Sekolah', ':', r.sekolah || ''],
+      ['Token', ':', r.token || ''],
+      [],
+      ['Skor Jawaban:'],
+      ['R', 'I', 'A', 'S', 'E', 'C'],
+      [s.R || 0, s.I || 0, s.A || 0, s.S || 0, s.E || 0, s.C || 0],
+      [],
+      ['Kode Holland', ':', r.top3Kode || ''],
+      ['Konsistensi', ':', (r.interpretasi && r.interpretasi.konsistensi) || 'Sedang'],
+      ['Bidang Utama', ':', r.bidangUtama || ''],
+      ['Deskripsi', ':', (r.interpretasi && r.interpretasi.deskripsi) || ''],
+      ['Profesi & Karir', ':', (r.interpretasi && r.interpretasi.profesiTerkait) || '']
+    ];
+    unduhFileExcel('Report_Holland_' + (r.nama || r.token).replace(/\s+/g, '_'), rows);
+  }
+
+  function cetakReportModal() {
+    var printContent = document.querySelector('#modalReportHollandAdmin .excel-report-card');
+    if (!printContent) {
+      window.print();
+      return;
+    }
+    try {
+      var w = window.open('', '_blank', 'width=850,height=900');
+      if (w) {
+        var namaSiswa = document.getElementById('modalRepNama').textContent || 'Siswa';
+        w.document.write('<!DOCTYPE html><html><head><title>Report Holland Test - ' + esc(namaSiswa) + '</title>');
+        w.document.write('<style>' +
+          '@page { size: A4 portrait; margin: 12mm 15mm; }' +
+          '* { box-sizing: border-box; }' +
+          'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 20px; color: #1F2937; background: #FFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+          '.excel-banner-header { background: #D97706 !important; color: #FFFFFF !important; font-size: 18px; font-weight: 800; text-align: center; padding: 12px 20px; border-radius: 6px; letter-spacing: 1px; margin-bottom: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+          '.biodata-grid-excel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; padding: 12px 0 16px; border-bottom: 2px solid #E5E7EB; font-size: 13px; }' +
+          '.bio-item { display: flex; align-items: center; }' +
+          '.bio-lbl { width: 120px; font-weight: 600; color: #4B5563; }' +
+          '.bio-sep { width: 14px; }' +
+          '.bio-val { font-weight: 700; color: #111827; }' +
+          '.mono { font-family: monospace; }' +
+          '.skor-section { margin-top: 16px; }' +
+          '.section-subtitle { font-size: 14px; font-weight: 800; color: #111827; margin-bottom: 10px; }' +
+          '.tabel-riasec-excel { width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 18px; }' +
+          '.tabel-riasec-excel th, .tabel-riasec-excel td { border: 1.5px solid #FCD34D; padding: 8px 6px; }' +
+          '.th-kode { background: #FEF3C7 !important; font-size: 15px; font-weight: 900; color: #92400E; width: 16.66%; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+          '.th-nama { background: #FFFBEB !important; font-size: 11px; font-weight: 600; color: #78350F; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+          '.td-skor { font-size: 20px; font-weight: 900; color: #1E3A8A; font-family: monospace; }' +
+          '.radar-box { display: flex; justify-content: center; align-items: center; padding: 12px 0; page-break-inside: avoid; }' +
+          '.interpretasi-card { background: #F8FAFC !important; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; margin-top: 16px; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+          '.badge-konsistensi { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+          '.kons-Tinggi { background: #DCFCE7 !important; color: #15803D !important; border: 1px solid #86EFAC; }' +
+          '.kons-Sedang { background: #FEF9C3 !important; color: #A16207 !important; border: 1px solid #FDE047; }' +
+          '.kons-Rendah { background: #FEE2E2 !important; color: #B91C1C !important; border: 1px solid #FCA5A5; }' +
+          '.box-info-item { background: #FFFFFF !important; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }' +
+          '.box-info-lbl { font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }' +
+          '.box-info-txt { font-size: 12.5px; color: #334155; line-height: 1.5; }' +
+          '</style></head><body>');
+        w.document.write(printContent.outerHTML);
+        w.document.write('</body></html>');
+        w.document.close();
+        setTimeout(function() {
+          w.focus();
+          w.print();
+        }, 400);
+        return;
+      }
+    } catch(e) {}
+    window.print();
+  }
+
+  function eksporLaporanExcel() {
+    if (!semuaLaporan.length) { showToast('Tidak ada data hasil untuk diekspor.','warning'); return; }
+    var headers = ['No','Token','Nama Siswa','Jenis Kelamin','Tanggal Lahir','Pendidikan','Sekolah','Skor R','Skor I','Skor A','Skor S','Skor E','Skor C','Kode Holland','Bidang Utama','Bidang 2','Bidang 3','Konsistensi','Tanggal Selesai'];
+    var rows = [headers];
+    semuaLaporan.forEach(function(r, idx) {
+      var s = r.skor || {};
+      rows.push([
+        idx + 1,
+        r.token || '',
+        r.nama || '',
+        r.jenisKelamin || 'Laki-laki',
+        r.tanggalLahir || '',
+        r.pendidikan || r.jenjang || 'SD',
+        r.sekolah || '',
+        s.R !== undefined ? s.R : 0,
+        s.I !== undefined ? s.I : 0,
+        s.A !== undefined ? s.A : 0,
+        s.S !== undefined ? s.S : 0,
+        s.E !== undefined ? s.E : 0,
+        s.C !== undefined ? s.C : 0,
+        r.top3Kode || '',
+        r.bidangUtama || '',
+        r.bidang2 || '',
+        r.bidang3 || '',
+        r.konsistensi || 'Sedang',
+        r.timestamp || ''
+      ]);
+    });
+    unduhFileExcel('laporan_fomo_lengkap_' + new Date().toISOString().slice(0,10), rows);
+    showToast('File Excel lengkap berhasil diunduh (' + semuaLaporan.length + ' data).','success');
+  }
+
+  function eksporLaporanCSV() {
+    if (!semuaLaporan.length) { showToast('Tidak ada data.','warning'); return; }
+    var headers = ['No','Token','Nama_Siswa','Jenis_Kelamin','Tanggal_Lahir','Pendidikan','Sekolah','Skor_R','Skor_I','Skor_A','Skor_S','Skor_E','Skor_C','Kode_Holland','Bidang_Utama','Bidang_2','Bidang_3','Konsistensi','Tanggal'];
+    var lines = [headers.join(',')];
+    semuaLaporan.forEach(function(r, idx) {
+      var s = r.skor || {};
+      lines.push([
+        idx + 1,
+        r.token,
+        '"' + (r.nama || '').replace(/"/g, '""') + '"',
+        r.jenisKelamin || 'Laki-laki',
+        r.tanggalLahir || '',
+        r.pendidikan || r.jenjang || 'SD',
+        '"' + (r.sekolah || '').replace(/"/g, '""') + '"',
+        s.R || 0, s.I || 0, s.A || 0, s.S || 0, s.E || 0, s.C || 0,
+        r.top3Kode || '',
+        '"' + (r.bidangUtama || '') + '"',
+        '"' + (r.bidang2 || '') + '"',
+        '"' + (r.bidang3 || '') + '"',
+        r.konsistensi || 'Sedang',
+        r.timestamp || ''
+      ].join(','));
+    });
+    unduhCSV('laporan_fomo_' + new Date().toISOString().slice(0,10) + '.csv', lines.join('\n'));
+    showToast('CSV laporan berhasil diunduh.','success');
+  }
+
+  // ---- IMPOR EXCEL ----
+  function handleDrop(e) {
+    e.preventDefault(); document.getElementById('uploadArea').classList.remove('drag-over');
+    var f = e.dataTransfer.files[0]; if (f) prosesFile(f);
+  }
+  function handlePilihFile(e) { var f = e.target.files[0]; if (f) prosesFile(f); }
+
+  function prosesFile(file) {
+    if (!file.name.match(/\.(xlsx|xls)$/i)) { showAlert('alertImport','error','File harus berformat .xlsx atau .xls.'); return; }
+    document.getElementById('uploadArea').innerHTML = '<svg class="icon icon-2xl upload-icon" style="color:var(--blue-400);"><use href="#i-clock"/></svg><div class="upload-text">Membaca: '+esc(file.name)+'</div><div class="upload-hint">Mohon tunggu...</div>';
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array'});
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var json = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        if (json.length < 2) { showAlert('alertImport','error','File kosong atau tidak ada data.'); resetUpload(); return; }
+        var rows = json.slice(1).filter(function(r){ return r[0] && String(r[0]).trim(); });
+        dataPratinjau = rows.map(function(r) {
+          return { teks:String(r[0]||'').trim(), kode:String(r[1]||'R').toUpperCase().trim(), jenjang:String(r[2]||'SEMUA').toUpperCase().trim(), opsiA:String(r[3]||'Ya').trim(), opsiB:String(r[4]||'Tidak').trim(), nilaiA:parseFloat(r[5])===undefined?1:parseFloat(r[5])||1, nilaiB:parseFloat(r[6])===undefined?0:parseFloat(r[6])||0 };
+        }).filter(function(r){ return r.teks.length > 0; });
+        if (!dataPratinjau.length) { showAlert('alertImport','error','Tidak ada soal valid ditemukan.'); resetUpload(); return; }
+        tampilPratinjau(dataPratinjau, file.name);
+      } catch(err) { showAlert('alertImport','error','Gagal membaca file: '+err.message); resetUpload(); }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function tampilPratinjau(data, nama) {
+    document.getElementById('uploadArea').innerHTML = '<svg class="icon icon-2xl upload-icon" style="color:var(--green-600);"><use href="#i-check-circle"/></svg><div class="upload-text">'+esc(nama)+'</div><div class="upload-hint">'+data.length+' soal ditemukan</div>';
+    document.getElementById('jmlPratinjau').textContent = data.length;
+    document.getElementById('jmlImpor').textContent     = data.length;
+    var kodeValid = ['R','I','A','S','E','C','G'];
+    document.getElementById('bodyPratinjau').innerHTML = data.map(function(r,i) {
+      var ok = kodeValid.includes(r.kode);
+      return '<tr style="'+(ok?'':'background:var(--red-50);')+'"><td style="font-size:11px;color:var(--gray-400);">'+(i+1)+'</td><td style="font-size:12px;max-width:180px;" class="truncate">'+esc(r.teks.substring(0,80))+'</td><td><span class="badge '+(ok?'badge-primary':'badge-danger')+'">'+esc(r.kode)+'</span></td><td style="font-size:12px;">'+esc(KODE_BIDANG[r.kode]||'Tidak Dikenal')+'</td><td><span class="badge badge-neutral">'+esc(r.jenjang)+'</span></td><td style="font-size:11px;color:var(--gray-500);" class="truncate">'+esc(r.opsiA)+'</td><td style="font-size:11px;color:var(--gray-500);" class="truncate">'+esc(r.opsiB)+'</td></tr>';
+    }).join('');
+    document.getElementById('kartuPratinjau').classList.remove('hidden');
+    document.getElementById('kartuPratinjau').scrollIntoView({behavior:'smooth'});
+  }
+
+  function resetUpload() {
+    document.getElementById('uploadArea').innerHTML = '<svg class="icon icon-2xl upload-icon"><use href="#i-upload-cloud"/></svg><div class="upload-text">Klik atau seret file Excel ke sini</div><div class="upload-hint">Format: .xlsx atau .xls &nbsp;&bull;&nbsp; Maks 10 MB</div>';
+    document.getElementById('fileExcel').value = '';
+  }
+
+  function batalImpor() { dataPratinjau=[]; document.getElementById('kartuPratinjau').classList.add('hidden'); document.getElementById('alertPratinjau').innerHTML=''; resetUpload(); }
+
+  function prosesImpor() {
+    if (!dataPratinjau.length) return;
+    setLoading(true,'Mengimpor '+dataPratinjau.length+' soal...');
+    document.getElementById('btnImpor').disabled = true;
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false); document.getElementById('btnImpor').disabled = false;
+        if (!res.success) { showAlert('alertPratinjau','error', res.message); return; }
+        showToast(res.message,'success'); batalImpor(); muatStatistik(); semuaSoal=[];
+      })
+      .withFailureHandler(function(err){ setLoading(false); document.getElementById('btnImpor').disabled = false; showAlert('alertPratinjau','error','Gagal impor: '+(err.message||'')); })
+      .importSoal(dataPratinjau, document.getElementById('hapusLama').checked);
+  }
+
+  function unggahTemplate() {
+    var data = [
+      ['teks_soal','kode_riasec','jenjang','opsi_a','opsi_b','nilai_a','nilai_b'],
+      ['Saya suka bermain bola dan berlari','R','SEMUA','Ya, sangat suka','Tidak terlalu suka','1','0'],
+      ['Saya senang menggambar dan mewarnai','A','SD','Ya, suka sekali','Biasa saja','1','0'],
+      ['Saya suka berhitung dan soal matematika','C','SD','Ya, suka','Tidak suka','1','0'],
+      ['Saya senang belajar mengaji dan agama','G','SEMUA','Ya, sangat suka','Biasa saja','1','0'],
+      ['Aku suka berlari-lari di taman','R','TK','Ya','Tidak','1','0']
+    ];
+    var ws = XLSX.utils.aoa_to_sheet(data);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template_Soal_FOMO');
+    XLSX.writeFile(wb, 'Template_Soal_FOMO.xlsx');
+    showToast('Template Excel berhasil diunduh.','success');
+  }
+
+  // ---- KELUAR ----
+  function keluar() { 
+    sessionStorage.removeItem('fomo_admin'); 
+    sessionStorage.removeItem('fomo_role'); 
+    navigasiKe(APP_URL + '?page=login');
+  }
+
+  // ---- UTILITAS ----
+  function setLoading(show, text) {
+    var o = document.getElementById('loadingOverlay');
+    if (show) { o.classList.remove('hidden'); if(text) document.getElementById('loadingText').textContent = text; }
+    else o.classList.add('hidden');
+  }
+  function showAlert(id, type, msg) {
+    var icons = {success:'i-check-circle',error:'i-alert-circle',info:'i-info',warning:'i-alert-tri'};
+    document.getElementById(id).innerHTML = '<div class="alert alert-'+type+'"><svg class="icon icon-sm"><use href="#'+(icons[type]||'i-info')+'"/></svg><span>'+msg+'</span></div>';
+    setTimeout(function(){ var e=document.getElementById(id); if(e) e.innerHTML=''; },6000);
+  }
+  function showToast(msg, type) {
+    var icons = {success:'i-check-circle',error:'i-alert-circle',info:'i-info',warning:'i-alert-tri'};
+    var t = document.createElement('div'); t.className = 'toast '+(type||'info');
+    t.innerHTML = '<svg class="icon icon-sm"><use href="#'+(icons[type]||'i-info')+'"/></svg><span>'+msg+'</span>';
+    document.getElementById('toastWrap').appendChild(t); setTimeout(function(){t.remove();},3500);
+  }
+  function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+  function unduhCSV(nama, isi) {
+    var blob = new Blob(['\uFEFF'+isi],{type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download=nama; a.click(); URL.revokeObjectURL(url);
+  }
+
+  function unduhFileExcel(filename, rows) {
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
+      '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">' +
+      '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>' +
+      '<x:Name>Laporan FOMO</x:Name>' +
+      '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+      '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' +
+      '<style>' +
+      'table { border-collapse:collapse; font-family: Calibri, sans-serif; }' +
+      'th { background:#F39C12; color:#FFFFFF; font-weight:bold; border:1px solid #D1D5DB; padding:8px 12px; text-align:center; }' +
+      'td { border:1px solid #E5E7EB; padding:6px 10px; font-size:11pt; }' +
+      '.mono { font-family: Consolas, monospace; font-weight:bold; }' +
+      '</style>' +
+      '</head><body><table>';
+
+    rows.forEach(function(row, idx) {
+      html += '<tr>';
+      row.forEach(function(val) {
+        var tag = idx === 0 ? 'th' : 'td';
+        var txt = val !== undefined && val !== null ? String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+        html += '<' + tag + '>' + txt + '</' + tag + '>';
+      });
+      html += '</tr>';
+    });
+
+    html += '</table></body></html>';
+
+    var blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename + '.xls';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+<!-- ===== MODAL EDIT TOKEN ===== -->
+<div class="modal-overlay hidden" id="modalEditToken">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title"><svg class="icon icon-sm"><use href="#i-pencil"/></svg> Edit Token</span>
+      <button class="modal-close" onclick="tutupModalEdit()"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="alertEditToken"></div>
+      <div class="form-group">
+        <label class="form-label">Token</label>
+        <input type="text" id="editToken" class="form-control mono" readonly style="background:var(--gray-50);color:var(--gray-500);"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><svg class="icon icon-xs"><use href="#i-graduation"/></svg> Jenjang</label>
+        <select id="editJenjang" class="form-control">
+          <option value="SEMUA">SEMUA — Semua Jenjang</option>
+          <option value="SD">SD — Sekolah Dasar</option>
+          <option value="TK">TK — Taman Kanak-Kanak</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><svg class="icon icon-xs"><use href="#i-building"/></svg> Nama Sekolah</label>
+        <input type="text" id="editSekolah" class="form-control" placeholder="Nama sekolah..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><svg class="icon icon-xs"><use href="#i-user"/></svg> Nama Wali / Kelas</label>
+        <input type="text" id="editWali" class="form-control" placeholder="Nama wali atau kelas..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><svg class="icon icon-xs"><use href="#i-activity"/></svg> Status</label>
+        <select id="editStatus" class="form-control">
+          <option value="aktif">Aktif</option>
+          <option value="dipakai">Dipakai</option>
+          <option value="nonaktif">Nonaktif</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="tutupModalEdit()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanEditToken()" id="btnSimpanEdit">
+        <svg class="icon icon-sm"><use href="#i-check"/></svg> Simpan Perubahan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL SOAL (TAMBAH / EDIT) ===== -->
+<div class="modal-overlay hidden" id="modalSoal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
+  <div class="modal-box" style="max-width:580px;width:92%;background:var(--white);border-radius:var(--r-xl);box-shadow:var(--shadow-xl);overflow:hidden;animation:fadeIn .2s ease;">
+    <div class="modal-header">
+      <span class="modal-title" id="modalSoalTitle"><svg class="icon icon-sm"><use href="#i-pencil"/></svg> Tambah Soal</span>
+      <button class="modal-close" onclick="tutupModalSoal()"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding:20px;max-height:80vh;overflow-y:auto;">
+      <div id="alertModalSoal"></div>
+      <input type="hidden" id="soalMode" value="tambah"/>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">ID Soal</label>
+          <input type="text" id="soalId" class="form-control mono" readonly placeholder="Otomatis (misal: S109)" style="background:var(--gray-50);color:var(--gray-600);"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><svg class="icon icon-xs"><use href="#i-tag"/></svg> Kode RIASEC <span class="req">*</span></label>
+          <select id="soalKode" class="form-control">
+            <option value="R">R — Realistik (Teknik / Fisik)</option>
+            <option value="I">I — Investigatif (Sains / Analisis)</option>
+            <option value="A">A — Artistik (Seni / Kreativitas)</option>
+            <option value="S">S — Sosial (Membantu / Mengajar)</option>
+            <option value="E">E — Enterprising (Bisnis / Kepemimpinan)</option>
+            <option value="C">C — Konvensional (Data / Keteraturan)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><svg class="icon icon-xs"><use href="#i-file-text"/></svg> Teks Soal / Pertanyaan <span class="req">*</span></label>
+        <textarea id="soalTeks" class="form-control" rows="3" placeholder="Tuliskan pernyataan atau aktivitas soal di sini..."></textarea>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label"><svg class="icon icon-xs"><use href="#i-graduation"/></svg> Jenjang</label>
+          <select id="soalJenjang" class="form-control">
+            <option value="SEMUA">SEMUA — Semua Jenjang</option>
+            <option value="SD">SD — Sekolah Dasar</option>
+            <option value="TK">TK — Taman Kanak-Kanak</option>
+            <option value="SMP">SMP — Sekolah Menengah Pertama</option>
+            <option value="SMA">SMA — Sekolah Menengah Atas / SMK</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><svg class="icon icon-xs"><use href="#i-activity"/></svg> Status</label>
+          <select id="soalAktif" class="form-control">
+            <option value="aktif">Aktif</option>
+            <option value="nonaktif">Nonaktif</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Pilihan A</label>
+          <input type="text" id="soalOpsiA" class="form-control" value="Ya" placeholder="Contoh: Ya / Suka"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pilihan B</label>
+          <input type="text" id="soalOpsiB" class="form-control" value="Tidak" placeholder="Contoh: Tidak / Tidak Suka"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="tutupModalSoal()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanSoal()" id="btnSimpanSoal">
+        <svg class="icon icon-sm"><use href="#i-check"/></svg> Simpan Soal
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL REPORT HOLLAND TEST (RIASEC) ADMIN PREVIEW ===== -->
+<div class="modal-overlay hidden" id="modalReportHollandAdmin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(3px);">
+  <div class="modal-box" style="max-width:780px;width:95%;background:var(--white);border-radius:var(--r-xl);box-shadow:var(--shadow-xl);overflow:hidden;animation:fadeIn .2s ease;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="modal-header print-hide" style="padding:14px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;background:#FAFAFA;">
+      <span class="modal-title" style="font-size:15px;font-weight:700;color:#1F2937;display:flex;align-items:center;gap:8px;">
+        <svg class="icon icon-sm" style="color:#D97706;"><use href="#i-file-text"/></svg> Report Holland Test (RIASEC)
+      </span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="unduhExcelSiswaModal()" title="Download Excel Siswa">
+          <svg class="icon icon-xs"><use href="#i-download"/></svg> Excel
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="cetakReportModal()" title="Cetak / Simpan PDF">
+          <svg class="icon icon-xs"><use href="#i-printer"/></svg> Cetak PDF
+        </button>
+        <button class="modal-close" onclick="tutupReportModal()"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:20px;overflow-y:auto;flex:1;">
+      <!-- Kartu Format Persis Excel -->
+      <div class="excel-report-card">
+        <div class="excel-banner-header">
+          REPORT HOLLAND TEST (RIASEC)
+        </div>
+
+        <div class="biodata-grid-excel">
+          <div class="bio-item">
+            <span class="bio-lbl">Nama</span>
+            <span class="bio-sep">:</span>
+            <span class="bio-val" id="modalRepNama">—</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-lbl">Tanggal Lahir</span>
+            <span class="bio-sep">:</span>
+            <span class="bio-val" id="modalRepTglLahir">00 Jan 1900</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-lbl">Jenis Kelamin</span>
+            <span class="bio-sep">:</span>
+            <span class="bio-val" id="modalRepJK">Laki-laki</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-lbl">Pendidikan</span>
+            <span class="bio-sep">:</span>
+            <span class="bio-val" id="modalRepPendidikan">SD</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-lbl">Sekolah</span>
+            <span class="bio-sep">:</span>
+            <span class="bio-val" id="modalRepSekolah">—</span>
+          </div>
+          <div class="bio-item">
+            <span class="bio-lbl">Token</span>
+            <span class="bio-sep">:</span>
+            <span class="bio-val mono" id="modalRepToken" style="color:#1D4ED8;">—</span>
+          </div>
+        </div>
+
+        <div class="skor-section">
+          <div class="section-subtitle">Skor Jawaban:</div>
+          <table class="tabel-riasec-excel">
+            <thead>
+              <tr>
+                <th class="th-kode">R</th>
+                <th class="th-kode">I</th>
+                <th class="th-kode">A</th>
+                <th class="th-kode">S</th>
+                <th class="th-kode">E</th>
+                <th class="th-kode">C</th>
+              </tr>
+              <tr>
+                <th class="th-nama">Realistic</th>
+                <th class="th-nama">Investigative</th>
+                <th class="th-nama">Artistic</th>
+                <th class="th-nama">Social</th>
+                <th class="th-nama">Enterprising</th>
+                <th class="th-nama">Conventional</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-skor" id="modalRepSkorR">0</td>
+                <td class="td-skor" id="modalRepSkorI">0</td>
+                <td class="td-skor" id="modalRepSkorA">0</td>
+                <td class="td-skor" id="modalRepSkorS">0</td>
+                <td class="td-skor" id="modalRepSkorE">0</td>
+                <td class="td-skor" id="modalRepSkorC">0</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Hexagon Radar Chart -->
+          <div class="radar-box">
+            <svg id="radarSvgModal" width="400" height="360" viewBox="0 0 400 360" style="max-width:100%;height:auto;"></svg>
+          </div>
+
+          <!-- Interpretasi Holland -->
+          <div class="interpretasi-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #E2E8F0;">
+              <div>
+                <span style="font-size:12px;color:#64748B;font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Kode Karakter Holland</span>
+                <span id="modalRepKodeHolland" style="font-family:monospace;font-size:22px;font-weight:900;color:#1D4ED8;letter-spacing:2px;background:#EFF6FF;padding:4px 12px;border-radius:8px;border:1.5px solid #BFDBFE;">—</span>
+              </div>
+              <div>
+                <span style="font-size:12px;color:#64748B;font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;">Tingkat Konsistensi</span>
+                <span id="modalRepKonsistensi" class="badge-konsistensi kons-Sedang">Sedang</span>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#64748B;margin-bottom:14px;" id="modalRepTop3Detail">—</div>
+
+            <div class="box-info-item">
+              <div class="box-info-lbl">Deskripsi Profil Minat & Kepribadian:</div>
+              <div class="box-info-txt" id="modalRepDeskripsi">—</div>
+            </div>
+
+            <div class="box-info-item">
+              <div class="box-info-lbl">Profesi & Bidang Karir Terkait:</div>
+              <div class="box-info-txt" id="modalRepProfesi" style="font-weight:600;color:#1E3A8A;">—</div>
+            </div>
+
+            <div class="box-info-item" style="background:#FFFBEB;border-color:#FDE68A;">
+              <div class="box-info-lbl" style="color:#B45309;">Rekomendasi Kombinasi Karir (Referensi Excel):</div>
+              <div class="box-info-txt" id="modalRepKombinasiMulti" style="white-space:pre-line;font-size:12.5px;color:#78350F;">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer print-hide" style="padding:14px 20px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;background:#FAFAFA;">
+      <button class="btn btn-secondary" onclick="tutupReportModal()">Tutup</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="unduhExcelSiswaModal()">
+          <svg class="icon icon-sm"><use href="#i-download"/></svg> Unduh File Excel
+        </button>
+        <button class="btn btn-primary" onclick="cetakReportModal()">
+          <svg class="icon icon-sm"><use href="#i-printer"/></svg> Cetak / Simpan PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

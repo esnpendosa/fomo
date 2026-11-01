@@ -1,0 +1,237 @@
+{
+  "single": {
+    "R": {
+      "deskripsi": "Profil ini menyukai pekerjaan yang mencakup masalah dan jawaban praktis dan langsung. Menyukai kegiatan yang melibatkan keterampilan motorik, peralatan, mesin Seringkali orang dengan minat Realistis tidak menyukai karier yang melibatkan dokumen atau bekerja sama dengan orang lain.",
+      "profesi": "Mekanik, Insinyur, pengawas bangunan, Petani /Peternak Modern, Atlet, Operator, Polisi, Pemadam Kebakaran, Koki"
+    },
+    "I": {
+      "deskripsi": "Profil ini menyukai pekerjaan yang berkaitan dengan ide dan pemikiran. memilih kegiatan penyelidikan yang observasional, simbolis, sistematis dan kreatif atas fenomena fisik, biologis dan kultural dalam usahanya untuk mengerti dan mengendalikan fenomena tersebut.  Mereka berprestasi terutama dalam bidang akademik dan ilmiah, serta biasanya kurang menyukai aktivitas fisik atau memimpin orang.",
+      "profesi": "Ahli antropologi, astronomi, biologi, botani, kimia, editor penerbitan ilmiah, geologi, pekerjaan penelitian, dan pekerjaan lain yang sejenis"
+    },
+    "A": {
+      "deskripsi": "Profil ini menyukai pekerjaan dan aktivitas yang bebas, tidak sistematis, ambisius dalam usahanya memanipulasi material fisik, verbal dan humanistic untuk tujuan menciptakan bentuk-bentuk atau produk-produk seni. Kecenderungan ini mengantarkannya memiliki kompetensi artistik, bahasa, musik, drama, mengarang. Tetapi mengurangi kompetensi dibidang klerikal dan bisnis. ",
+      "profesi": "Desainer, Penulis, Musisi, Arsitek, Wartawan, Penari, Translator, Artis dan pekerjaan lain yang sejenis."
+    },
+    "S": {
+      "deskripsi": "Profil ini menyukai aktivitas yang melibatkan berelasi, berkomunikasi dan mengajar orang. Mereka dilambangkan dengan ketrampilan sosial dan kebutuhan untuk interaksi sosial. Pekerjaannya sering melibatkan membantu atau memberikan layanan kepada orang lain. Tetapi mengurangi kompetensi di bidang teknik dan manual.  ",
+      "profesi": "Guru, Terapis, Tour Guide, Perawat, Hakim, Konselor, Psikolog, Sejarawan, misionari, Pekerja Sosial, Ahli Patolog Bicara dan pekerjaan lain yang sejenis."
+    },
+    "E": {
+      "deskripsi": "Profil ini menghasilkan preferensi yang mendorong individu untuk menikmati memanipulasi kegiatan orang lain dalam usahanya mencapai tujuan organisasi atau keuntungan ekonomi. Kecenderungan ini akan mengarah pada kompetensi kepemimpinan, hubungan timbal balik pribadi dan persuasif, tugas yang menitikberatkan kepada kemampuan verbal yang digunakan untuk mengarahkan dan mempengaruhi orang lain. Tetapi mengurangi kompetensi ilmiah.",
+      "profesi": "Pengacara, Pelobi, Politikus, Pegawai humas, Pelobi, Manajer penjualan, Staf penjualan, perwakilan dagang, dan pekerjaan lain yang sejenis."
+    },
+    "C": {
+      "deskripsi": "Profil ini menghasilkan preferensi yang membawa individu untuk menyenangi aktivitas yang teratur dan sistematis seperti misalnya mengarsipkan sesuatu, mereproduksi material, mencatat data, mengolah data, menyukai pekerjaan yang mengikuti prosedur dan rutinitas yang ditetapkan. Kecenderungan ini me-ngantarkan individu memiliki kompetensi klerikal, menghitung / kompetensi Operasional bisnis. Tapi mengurangi kompetensi artistik.",
+      "profesi": "Akuntan, Aktuaris, Ahli Statistik, Analis Keuangan, Operator komputer, Pustakawan, Programer Bisnis, Pengarsip, dan pekerjaan yang berhubungan dengan administrasi."
+    }
+  },
+  "konsistensi": {
+    "RI": "Tinggi",
+    "RC": "Tinggi",
+    "IR": "Tinggi",
+    "IA": "Tinggi",
+    "AI": "Tinggi",
+    "AS": "Tinggi",
+    "SA": "Tinggi",
+    "SE": "Tinggi",
+    "ES": "Tinggi",
+    "CE": "Tinggi",
+    "EC": "Tinggi",
+    "CR": "Tinggi",
+    "RA": "Sedang",
+    "RE": "Sedang",
+    "IS": "Sedang",
+    "IC": "Sedang",
+    "AR": "Sedang",
+    "AE": "Sedang",
+    "SI": "Sedang",
+    "SC": "Sedang",
+    "EA": "Sedang",
+    "ER": "Sedang",
+    "CS": "Sedang",
+    "CI": "Sedang",
+    "RS": "Rendah",
+    "IE": "Rendah",
+    "AC": "Rendah",
+    "SR": "Rendah",
+    "EI": "Rendah",
+    "CA": "Rendah"
+  },
+  "combo2": {
+    "AC": {
+      "profesi": "Graphic Designer, Proofreader, Web/Mobile Design, UI Designer & Visual Designer,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang kreatif dan berorientasi pada proses. Jenis pekerjaan ini membutuhkan proses pemikiran artistik dan cara kerja yang sehat, andal, dan terstruktur."
+    },
+    "AS": {
+      "profesi": "Guru, Translator, Nanny, Career Advisor & Interpreter,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang kreatif dan berorientasi pada manusia. Jenis pekerjaan ini membutuhkan pikiran artistik dan sosial."
+    },
+    "EC": {
+      "profesi": "General manager, Air traffic controller, Branch Manager, Fundraiser, Recruiter & Shop Assistant,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang giat dan berbasis proses. Jenis pekerjaan ini membutuhkan banyak tanggung jawab pribadi dan cara kerja yang sehat, andal, dan terstruktur."
+    },
+    "IA": {
+      "profesi": "Architect, Technical Writer, Animator & Desktop Publisher,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang berorientasi pada penelitian dan kreatif. Ini adalah jenis pekerjaan yang membutuhkan proses pemikiran analitis dan keingintahuan ilmiah. Pada saat yang sama, itu membutuhkan pola pikir yang unik dan artistik."
+    },
+    "IC": {
+      "profesi": "Pengembang perangkat lunak , UX Designer, Paralegal, Data Analyst & Quality Controller,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan penelitian dan pendekatan berbasis proses. Jenis pekerjaan ini membutuhkan proses pemikiran analitis dan cara kerja yang sehat, andal, dan terstruktur."
+    },
+    "IE": {
+      "profesi": "Consultant,Detektif, Solicitor, Market Researcher, Business Controller & Online marketer,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang berorientasi pada penelitian dan giat. Jenis pekerjaan ini membutuhkan proses pemikiran analitis, semangat giat dan rasa kepemimpinan dan tanggung jawab."
+    },
+    "IS": {
+      "profesi": "Dokter, Physics Teacher, Nurse, Physiotherapist & Coach,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan penelitian dan pendekatan yang berorientasi pada manusia. Jenis pekerjaan ini membutuhkan proses pemikiran analitis dan pola pikir sosial."
+    },
+    "RA": {
+      "profesi": "Photographer, Tailor, Artist, Pastry Chef & Furniture Designer,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali mencakup aktivitas yang melibatkan pendekatan fisik dan kreatif. Jenis pekerjaan ini membutuhkan tenaga kerja manual di satu sisi dan pola pikir imajinatif di sisi lain."
+    },
+    "RE": {
+      "profesi": "Koki, Engineering Manager, Police Officer, Process Operator & Taxi Driver,",
+      "deskripsi": "profesi yang terkait dengan profil ini sering kali melibatkan pendekatan fisik dan giat. Jenis pekerjaan ini membutuhkan tenaga kerja manual, mengambil inisiatif dan rasa tanggung jawab."
+    },
+    "AE": {
+      "profesi": "Design Interior, Illustrator, Entrepreneur, Journalist, Producer, Art director, Copywriter & Actor,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang kreatif dan giat. Jenis pekerjaan ini membutuhkan pikiran artistik, rasa tanggung jawab atau kadang-kadang bahkan kepemimpinan."
+    },
+    "RI": {
+      "profesi": "Network Engineer, Mechanical Engineer, Automotive Engineer, Electronic Enginer, Building Insulation Installer, Pilot,  Laboratory Technician, Fruit and Vegetable Factory Worker, Product Assembler,",
+      "deskripsi": "Profil ini terkait dengan profesi yang melibatkan banyak pekerjaan manual, pekerjaan di luar ruangan atau berhubungan dengan alat, mesin, benda, binatang atau tanaman. Pada saat yang sama, jenis profesi ini membutuhkan pemikiran yang cermat dan pendekatan yang lebih analitis."
+    },
+    "RS": {
+      "profesi": "Asisten perawatan, Fire fighter, Masseur, Sports Coach & Veterinary Assistant,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan fisik dan berorientasi pada manusia. Jenis pekerjaan ini membutuhkan tenaga kerja manual dan membantu orang lain."
+    },
+    "SC": {
+      "profesi": "Librarian, Telephone Operator, Medical Assistant & Teaching Assistant,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang berorientasi pada orang dan berbasis proses. Jenis pekerjaan ini membutuhkan bantuan orang lain atas dasar cara kerja yang baik, andal, dan terstruktur."
+    },
+    "RC": {
+      "profesi": "Lorry Driver, Machine Operator, Security Guard, Plumber, Cleaner, Warehouse operative & Service technician,",
+      "deskripsi": "Profesi yang terkait  Profil ini terkait dengan profesi yang banyak melibatkan tenaga fisik, manual dan outdoor yang melibatkan mesin. Pada saat yang sama, profesi semacam ini membutuhkan pendekatan yang cermat, teratur, dan terstruktur."
+    },
+    "SE": {
+      "profesi": "HR Manager, Account Manager, Customer Service Advisor & Waiter / Waitress,",
+      "deskripsi": "Profesi yang terkait dengan profil ini sering kali melibatkan pendekatan yang berorientasi pada orang dan giat. Jenis pekerjaan ini membutuhkan membantu orang lain di satu sisi dan mengambil kepemimpinan dan tanggung jawab di sisi lain."
+    }
+  },
+  "profesi_kombinasi": {
+    "AE": "Actors, Art Directors, Interior Designers, Video Game Designers,",
+    "AEC": "Editors,",
+    "AEI": "Film and Video Editors, News Analysts, Reporters, and Journalists,",
+    "AER": "Commercial and Industrial Designers, Fashion Designers, Floral Designers, Merchandise Displayers and Window Trimmers, Models,",
+    "AES": "Broadcast Announcers and Radio Disc Jockeys, Hairdressers, Hairstylists, and Cosmetologists, Music Directors and Composers, Musicians and Singers,",
+    "AI": "Architects, Except Landscape and Naval, Poets, Lyricists and Creative Writers, Special Effects Artists and Animators,",
+    "AIC": "Desktop Publishers, Technical Writers,",
+    "AIR": "Landscape Architects,",
+    "AR": "Dancers, Fine Artists, Including Painters, Sculptors, and Illustrators, Makeup Artists, Theatrical and Performance, Photographers, Set and Exhibit Designers,",
+    "ARC": "Cooks, Private Household,",
+    "ARE": "Craft Artists, Graphic Designers,",
+    "AS": "Interpreters and Translators,",
+    "ASE": "Choreographers,",
+    "C": "Document Management Specialists,",
+    "CA": "Proofreaders and Copy Markers,",
+    "CE": "Bill and Account Collectors, Bookkeeping, Accounting, and Auditing Clerks, Brokerage Clerks, Cashiers, Compensation, Benefits, and Job Analysis Specialists, Correspondence Clerks, Cost Estimators, Counter and Rental Clerks, Court Reporters and Simultaneous Captioners, Credit Analysts, Energy Auditors, Executive Secretaries and Executive Administrative Assistants, Freight Forwarders, Legal Secretaries and Administrative Assistants, Loan Interviewers and Clerks, Payroll and Timekeeping Clerks, Procurement Clerks, Production, Planning, and Expediting Clerks, Purchasing Agents, Except Wholesale, Retail, and Farm Products, Regulatory Affairs Specialists, Sales Representatives, Wholesale and Manufacturing, Except Technical and Scientific Products, Secretaries and Administrative Assistants, Except Legal, Medical, and Executive, Tax Examiners and Collectors, and Revenue Agents, Tax Preparers, Tellers, Treasurers and Controllers, Word Processors and Typists,",
+    "CEI": "Accountants and Auditors, Budget Analysts, Claims Adjusters, Examiners, and Investigators, Insurance Underwriters, Judicial Law Clerks, Logistics Analysts, Web Administrators,",
+    "CER": "Cargo and Freight Agents, Compliance Managers, Customs and Border Protection Officers, Gambling and Sports Book Writers and Runners, Gambling Cage Workers, Gambling Change Persons and Booth Cashiers, Gambling Dealers, Government Property Inspectors and Investigators, Office Clerks, General, Title Examiners, Abstractors, and Searchers,",
+    "CES": "Billing and Posting Clerks, Court, Municipal, and License Clerks, Credit Authorizers, Checkers, and Clerks, Hotel, Motel, and Resort Desk Clerks, Human Resources Assistants, Except Payroll and Timekeeping, Insurance Claims and Policy Processing Clerks, Interviewers, Except Eligibility and Loan, Loan Officers, New Accounts Clerks, Order Clerks, Receptionists and Information Clerks, Reservation and Transportation Ticket Agents and Travel Clerks, Switchboard Operators, Including Answering Service,",
+    "CI": "Archivists, Clinical Data Managers, Database Administrators, Social Science Research Assistants, Statistical Assistants, Statisticians,",
+    "CIE": "Actuaries, Paralegals and Legal Assistants,",
+    "CIR": "Computer Numerically Controlled Tool Programmers, Environmental Compliance Inspectors, Information Security Analysts, Quality Control Analysts, Web Developers,",
+    "CR": "Costume Attendants, Inspectors, Testers, Sorters, Samplers, and Weighers, Mail Clerks and Mail Machine Operators, Except Postal Service, Medical Transcriptionists, Meter Readers, Utilities, Occupational Health and Safety Technicians, Pharmacy Aides, Pharmacy Technicians, Photographic Process Workers and Processing Machine Operators, Postal Service Clerks, Postal Service Mail Carriers, Postal Service Mail Sorters, Processors, and Processing Machine Operators, Weighers, Measurers, Checkers, and Samplers, Recordkeeping,",
+    "CRE": "Data Entry Keyers, Dispatchers, Except Police, Fire, and Ambulance, File Clerks, Insurance Appraisers, Auto Damage, Public Safety Telecommunicators, Shipping, Receiving, and Inventory Clerks, Stockers and Order Fillers,",
+    "CRI": "Ophthalmic Medical Technologists, Phlebotomists, Police Identification and Records Officers, Surveying and Mapping Technicians,",
+    "CRS": "Dental Assistants, Library Assistants, Clerical, Orderlies,",
+    "CS": "Medical Secretaries and Administrative Assistants,",
+    "CSE": "Library Technicians, Social and Human Service Assistants,",
+    "CSR": "Librarians and Media Collections Specialists, Ophthalmic Medical Technicians, Surgical Assistants, Telephone Operators,",
+    "EA": "Talent Directors,",
+    "EAC": "Advertising and Promotions Managers, Writers and Authors,",
+    "EAS": "Producers and Directors, Public Relations Specialists,",
+    "EC": "Administrative Services Managers, Air Traffic Controllers, Chief Executives, Curators, Customs Brokers, Door-to-Door Sales Workers, News and Street Vendors, and Related Workers, Financial Examiners, Gambling Managers, Geothermal Production Managers, Hydroelectric Production Managers, Industrial Production Managers, Information Technology Project Managers, Investment Fund Managers, Logisticians, Loss Prevention Managers, Marketing Managers, Private Detectives and Investigators, Property, Real Estate, and Community Association Managers, Purchasing Managers, Real Estate Brokers, Real Estate Sales Agents, Recycling Coordinators, Regulatory Affairs Managers, Retail Loss Prevention Specialists, Retail Salespersons, Sales Managers, Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products, Supply Chain Managers, Telemarketers, Travel Agents, Travel Guides, Wholesale and Retail Buyers, Except Farm Products,",
+    "ECA": "Advertising Sales Agents, Fundraisers, Media Programming Directors,",
+    "ECI": "Chief Sustainability Officers, Computer and Information Systems Managers, Wind Energy Development Managers,",
+    "ECR": "Airfield Operations Specialists, Amusement and Recreation Attendants, Appraisers and Assessors of Real Estate, Baristas, Bartenders, Biofuels Production Managers, Biomass Power Plant Managers, Buyers and Purchasing Agents, Farm Products, Demonstrators and Product Promoters, First-Line Supervisors of Correctional Officers, First-Line Supervisors of Food Preparation and Serving Workers, First-Line Supervisors of Gambling Services Workers, First-Line Supervisors of Housekeeping and Janitorial Workers, First-Line Supervisors of Material-Moving Machine and Vehicle Operators, First-Line Supervisors of Mechanics, Installers, and Repairers, Food Service Managers, Online Merchants, Opticians, Dispensing, Parts Salespersons, Quality Control Systems Managers, Solar Sales Representatives and Assessors, Transportation, Storage, and Distribution Managers, Wind Energy Operations Managers,",
+    "ECS": "Compensation and Benefits Managers, Compliance Officers, Education Administrators, Postsecondary, Financial Managers, First-Line Supervisors of Non-Retail Sales Workers, First-Line Supervisors of Office and Administrative Support Workers, First-Line Supervisors of Personal Service Workers, First-Line Supervisors of Retail Sales Workers, Funeral Home Managers, General and Operations Managers, Human Resources Specialists, Insurance Sales Agents, Labor Relations Specialists, Lodging Managers, Medical and Health Services Managers, Meeting, Convention, and Event Planners, Personal Financial Advisors, Postmasters and Mail Superintendents, Securities, Commodities, and Financial Services Sales Agents, Spa Managers,",
+    "EI": "Biofuels/Biodiesel Technology and Product Development Managers, Lawyers, Natural Sciences Managers,",
+    "EIA": "Sustainability Specialists,",
+    "EIC": "Brownfield Redevelopment Specialists and Site Managers, Business Continuity Planners, Clinical Research Coordinators, Detectives and Criminal Investigators, Fraud Examiners, Investigators and Analysts, Search Marketing Strategists,",
+    "EIS": "Administrative Law Judges, Adjudicators, and Hearing Officers,",
+    "ER": "Aircraft Cargo Handling Supervisors, Solar Energy Installation Managers,",
+    "ERA": "Chefs and Head Cooks,",
+    "ERC": "Construction Managers, Farmers, Ranchers, and Other Agricultural Managers, First-Line Supervisors of Construction Trades and Extraction Workers, First-Line Supervisors of Farming, Fishing, and Forestry Workers, First-Line Supervisors of Helpers, Laborers, and Material Movers, Hand, First-Line Supervisors of Landscaping, Lawn Service, and Groundskeeping Workers, First-Line Supervisors of Production and Operating Workers, Media Technical Directors/Managers, Railroad Conductors and Yardmasters,",
+    "ERI": "Architectural and Engineering Managers, Sales Engineers,",
+    "ERS": "Farm Labor Contractors, First-Line Supervisors of Firefighting and Prevention Workers, Police and Sheriff's Patrol Officers,",
+    "ES": "Agents and Business Managers of Artists, Performers, and Athletes, Fitness and Wellness Coordinators, Hosts and Hostesses, Restaurant, Lounge, and Coffee Shop, Judges, Magistrate Judges, and Magistrates, Legislators, Social and Community Service Managers, Training and Development Managers,",
+    "ESC": "Clinical Nurse Specialists, Credit Counselors, Customer Service Representatives, Directors, Religious Activities and Education, Education Administrators, Kindergarten through Secondary, First-Line Supervisors of Police and Detectives, Flight Attendants, Human Resources Managers, Morticians, Undertakers, and Funeral Arrangers,",
+    "ESR": "Skincare Specialists,",
+    "I": "Historians,",
+    "IAR": "Anthropologists and Archeologists, Astronomers, Biochemists and Biophysicists, Geneticists,",
+    "IAS": "Political Scientists, Sociologists,",
+    "IC": "Biostatisticians, Computer Programmers, Data Warehousing Specialists, Financial Quantitative Analysts, Occupational Health and Safety Specialists,",
+    "ICA": "Mathematicians,",
+    "ICE": "Computer Network Architects, Database Architects, Economists, Industrial Engineers, Intelligence Analysts, Operations Research Analysts, Survey Researchers,",
+    "ICR": "Bioinformatics Scientists, Computer Systems Analysts, Geodetic Surveyors, Logistics Engineers, Software Quality Assurance Analysts and Testers, Transportation Planners,",
+    "ICS": "Pharmacists,",
+    "IE": "Climate Change Policy Analysts, Industrial Ecologists,",
+    "IEA": "Industrial-Organizational Psychologists, Urban and Regional Planners,",
+    "IEC": "Business Intelligence Analysts, Environmental Economists, Management Analysts, Market Research Analysts and Marketing Specialists, Water Resource Specialists,",
+    "IR": "Aerospace Engineers, Animal Scientists, Atmospheric and Space Scientists, Bioengineers and Biomedical Engineers, Biologists, Chemical Engineers, Cytotechnologists, Electrical Engineers, Electronics Engineers, Except Computer, Energy Engineers, Except Wind and Solar, Geoscientists, Except Hydrologists and Geographers, Human Factors Engineers and Ergonomists, Hydrologists, Materials Scientists, Microbiologists, Physicians, Pathologists, Physicists, Prosthodontists, Soil and Plant Scientists, Veterinarians, Zoologists and Wildlife Biologists,",
+    "IRA": "Geographers, Marine Engineers and Naval Architects, Medical Scientists, Except Epidemiologists, Molecular and Cellular Biologists,",
+    "IRC": "Bioinformatics Technicians, Chemical Technicians, Chemists, Computer and Information Research Scientists, Computer Hardware Engineers, Computer Systems Engineers/Architects, Coroners, Cytogenetic Technologists, Environmental Engineers, Environmental Science and Protection Technicians, Including Health, Environmental Scientists and Specialists, Including Health, Food Scientists and Technologists, Forensic Science Technicians, Geographic Information Systems Technologists and Technicians, Health and Safety Engineers, Except Mining Safety Engineers and Inspectors, Industrial Engineering Technologists and Technicians, Mechanical Engineers, Mechatronics Engineers, Medical and Clinical Laboratory Technologists, Microsystems Engineers, Network and Computer Systems Administrators, Nuclear Engineers, Petroleum Engineers, Photonics Engineers, Robotics Engineers, Validation Engineers,",
+    "IRE": "Agricultural Engineers, Environmental Restoration Planners, Fire-Prevention and Protection Engineers, Materials Engineers, Mining and Geological Engineers, Including Mining Safety Engineers, Nanosystems Engineers, Water/Wastewater Engineers,",
+    "IRS": "Anesthesiologists, Dentists, General, Nuclear Medicine Technologists, Nurse Anesthetists, Orthodontists, Radiologists,",
+    "IS": "Audiologists, Dietitians and Nutritionists, Epidemiologists, Family Medicine Physicians, Naturopathic Physicians, Pediatricians, General, School Psychologists,",
+    "ISA": "Clinical and Counseling Psychologists, Psychiatrists,",
+    "ISR": "Allergists and Immunologists, Dermatologists, Diagnostic Medical Sonographers, General Internal Medicine Physicians, Neurologists, Obstetricians and Gynecologists, Ophthalmologists, Except Pediatric, Optometrists, Orthoptists, Physical Medicine and Rehabilitation Physicians, Podiatrists, Sports Medicine Physicians, Urologists,",
+    "R": "Agricultural Equipment Operators, Animal Trainers, Automotive Body and Related Repairers, Commercial Divers, Dredge Operators, Excavating and Loading Machine and Dragline Operators, Surface Mining, Extruding and Forming Machine Setters, Operators, and Tenders, Synthetic and Glass Fibers, Farmworkers, Farm, Ranch, and Aquacultural Animals, Floor Sanders and Finishers, Grinding, Lapping, Polishing, and Buffing Machine Tool Setters, Operators, and Tenders, Metal and Plastic, Helpers--Brickmasons, Blockmasons, Stonemasons, and Tile and Marble Setters, Helpers--Pipelayers, Plumbers, Pipefitters, and Steamfitters, Insulation Workers, Floor, Ceiling, and Wall, Laborers and Freight, Stock, and Material Movers, Hand, Meat, Poultry, and Fish Cutters and Trimmers, Mechanical Door Repairers, Motorcycle Mechanics, Multiple Machine Tool Setters, Operators, and Tenders, Metal and Plastic, Painting, Coating, and Decorating Workers, Pipelayers, Plasterers and Stucco Masons, Rail-Track Laying and Maintenance Equipment Operators, Roustabouts, Oil and Gas, Septic Tank Servicers and Sewer Pipe Cleaners, Sheet Metal Workers, Stonemasons, Tapers, Terrazzo Workers and Finishers, Textile Bleaching and Dyeing Machine Operators and Tenders, Tree Trimmers and Pruners, Upholsterers,",
+    "RA": "Camera Operators, Television, Video, and Film, Furniture Finishers, Museum Technicians and Conservators, Potters, Manufacturing, Sound Engineering Technicians, Stone Cutters and Carvers, Manufacturing,",
+    "RAC": "Fabric and Apparel Patternmakers, Jewelers and Precious Stone and Metal Workers, Model Makers, Wood, Sewers, Hand,",
+    "RAE": "Tailors, Dressmakers, and Custom Sewers,",
+    "RAI": "Musical Instrument Repairers and Tuners,",
+    "RC": "Adhesive Bonding Machine Operators and Tenders, Aircraft Structure, Surfaces, Rigging, and Systems Assemblers, Animal Caretakers, Audiovisual Equipment Installers and Repairers, Automotive and Watercraft Service Attendants, Baggage Porters and Bellhops, Bakers, Boilermakers, Bus and Truck Mechanics and Diesel Engine Specialists, Cabinetmakers and Bench Carpenters, Chemical Equipment Operators and Tenders, Chemical Plant and System Operators, Cleaners of Vehicles and Equipment, Cleaning, Washing, and Metal Pickling Equipment Operators and Tenders, Coin, Vending, and Amusement Machine Servicers and Repairers, Computer Numerically Controlled Tool Operators, Construction Laborers, Conveyor Operators and Tenders, Cooks, Fast Food, Cooks, Institution and Cafeteria, Cooks, Short Order, Cutters and Trimmers, Hand, Cutting and Slicing Machine Setters, Operators, and Tenders, Cutting, Punching, and Press Machine Setters, Operators, and Tenders, Metal and Plastic, Dishwashers, Drywall and Ceiling Tile Installers, Electric Motor, Power Tool, and Related Repairers, Electrical and Electronic Equipment Assemblers, Electrical and Electronics Installers and Repairers, Transportation Equipment, Electrical and Electronics Repairers, Powerhouse, Substation, and Relay, Engine and Other Machine Assemblers, Etchers and Engravers, Extruding and Drawing Machine Setters, Operators, and Tenders, Metal and Plastic, Fallers, Farmworkers and Laborers, Crop, Nursery, and Greenhouse, Fence Erectors, Floor Layers, Except Carpet, Wood, and Hard Tiles, Food and Tobacco Roasting, Baking, and Drying Machine Operators and Tenders, Food Batchmakers, Food Cooking Machine Operators and Tenders, Food Preparation Workers, Foundry Mold and Coremakers, Furnace, Kiln, Oven, Drier, and Kettle Operators and Tenders, Gas Compressor and Gas Pumping Station Operators, Gas Plant Operators, Geothermal Technicians, Glaziers, Graders and Sorters, Agricultural Products, Grinding and Polishing Workers, Hand, Hazardous Materials Removal Workers, Heat Treating Equipment Setters, Operators, and Tenders, Metal and Plastic, Heavy and Tractor-Trailer Truck Drivers, Helpers--Carpenters, Helpers--Electricians, Helpers--Extraction Workers, Helpers--Painters, Paperhangers, Plasterers, and Stucco Masons, Helpers--Production Workers, Helpers--Roofers, Highway Maintenance Workers, Industrial Truck and Tractor Operators, Janitors and Cleaners, Except Maids and Housekeeping Cleaners, Landscaping and Groundskeeping Workers, Laundry and Dry-Cleaning Workers, Light Truck Drivers, Loading and Moving Machine Operators, Underground Mining, Locksmiths and Safe Repairers, Locomotive Engineers, Log Graders and Scalers, Machine Feeders and Offbearers, Maids and Housekeeping Cleaners, Manufactured Building and Mobile Home Installers, Milling and Planing Machine Setters, Operators, and Tenders, Metal and Plastic, Mobile Heavy Equipment Mechanics, Except Engines, Molders, Shapers, and Casters, Except Metal and Plastic, Motion Picture Projectionists, Office Machine Operators, Except Computer, Ophthalmic Laboratory Technicians, Outdoor Power Equipment and Other Small Engine Mechanics, Packaging and Filling Machine Operators and Tenders, Packers and Packagers, Hand, Painters, Construction and Maintenance, Paper Goods Machine Setters, Operators, and Tenders, Paperhangers, Parking Attendants, Parking Enforcement Workers, Paving, Surfacing, and Tamping Equipment Operators, Pest Control Workers, Pesticide Handlers, Sprayers, and Applicators, Vegetation, Petroleum Pump System Operators, Refinery Operators, and Gaugers, Plating Machine Setters, Operators, and Tenders, Metal and Plastic, Pourers and Casters, Metal, Power Plant Operators, Prepress Technicians and Workers, Pressers, Textile, Garment, and Related Materials, Print Binding and Finishing Workers, Printing Press Operators, Radio, Cellular, and Tower Equipment Installers and Repairers, Recycling and Reclamation Workers, Refuse and Recyclable Material Collectors, Rock Splitters, Quarry, Rolling Machine Setters, Operators, and Tenders, Metal and Plastic, Roof Bolters, Mining, Roofers, Sailors and Marine Oilers, Security and Fire Alarm Systems Installers, Segmental Pavers, Sewing Machine Operators, Shoe Machine Operators and Tenders, Signal and Track Switch Repairers, Slaughterers and Meat Packers, Solar Photovoltaic Installers, Solar Thermal Installers and Technicians, Structural Metal Fabricators and Fitters, Subway and Streetcar Operators, Tank Car, Truck, and Ship Loaders, Textile Cutting Machine Setters, Operators, and Tenders, Textile Knitting and Weaving Machine Setters, Operators, and Tenders, Textile Winding, Twisting, and Drawing Out Machine Setters, Operators, and Tenders, Timing Device Assemblers and Adjusters, Tire Builders, Tire Repairers and Changers, Tool Grinders, Filers, and Sharpeners, Water and Wastewater Treatment Plant and System Operators, Weatherization Installers and Technicians, Welding, Soldering, and Brazing Machine Setters, Operators, and Tenders, Wind Turbine Service Technicians,",
+    "RCA": "Architectural and Civil Drafters, Glass Blowers, Molders, Benders, and Finishers, Shoe and Leather Workers and Repairers, Tile and Stone Setters,",
+    "RCE": "Automotive Glass Installers and Repairers, Bailiffs, Bridge and Lock Tenders, Butchers and Meat Cutters, Couriers and Messengers, Forest Fire Inspectors and Prevention Specialists, Gambling Surveillance Officers and Gambling Investigators, Motorboat Operators, Nuclear Power Reactor Operators, Railroad Brake, Signal, and Switch Operators and Locomotive Firers, Security Guards, Ship Engineers, Team Assemblers, Transportation Inspectors,",
+    "RCI": "Agricultural Inspectors, Aircraft Mechanics and Service Technicians, Airline Pilots, Copilots, and Flight Engineers, Aviation Inspectors, Bicycle Repairers, Biofuels Processing Technicians, Biomass Plant Technicians, Brickmasons and Blockmasons, Broadcast Technicians, Camera and Photographic Equipment Repairers, Carpenters, Civil Engineering Technologists and Technicians, Coating, Painting, and Spraying Machine Setters, Operators, and Tenders, Coil Winders, Tapers, and Finishers, Computer, Automated Teller, and Office Machine Repairers, Construction and Building Inspectors, Continuous Mining Machine Operators, Control and Valve Installers and Repairers, Except Mechanical Door, Cooling and Freezing Equipment Operators and Tenders, Crane and Tower Operators, Crushing, Grinding, and Polishing Machine Setters, Operators, and Tenders, Derrick Operators, Oil and Gas, Drilling and Boring Machine Tool Setters, Operators, and Tenders, Metal and Plastic, Electrical and Electronics Drafters, Electromechanical Equipment Assemblers, Embalmers, Extruding, Forming, Pressing, and Compacting Machine Setters, Operators, and Tenders, Farm Equipment Mechanics and Service Technicians, Fiberglass Laminators and Fabricators, Fire Inspectors and Investigators, Forest and Conservation Workers, Forging Machine Setters, Operators, and Tenders, Metal and Plastic, Heating, Air Conditioning, and Refrigeration Mechanics and Installers, Helpers--Installation, Maintenance, and Repair Workers, Home Appliance Repairers, Hydroelectric Plant Technicians, Insulation Workers, Mechanical, Layout Workers, Metal and Plastic, Machinists, Maintenance and Repair Workers, General, Maintenance Workers, Machinery, Mechanical Drafters, Medical Equipment Preparers, Millwrights, Mixing and Blending Machine Setters, Operators, and Tenders, Molding, Coremaking, and Casting Machine Setters, Operators, and Tenders, Metal and Plastic, Motorboat Mechanics and Service Technicians, Nanotechnology Engineering Technologists and Technicians, Nuclear Monitoring Technicians, Nuclear Technicians, Operating Engineers and Other Construction Equipment Operators, Patternmakers, Metal and Plastic, Pile Driver Operators, Plumbers, Pipefitters, and Steamfitters, Pump Operators, Except Wellhead Pumpers, Rail Car Repairers, Rail Yard Engineers, Dinkey Operators, and Hostlers, Refractory Materials Repairers, Except Brickmasons, Reinforcing Iron and Rebar Workers, Riggers, Sawing Machine Setters, Operators, and Tenders, Wood, Semiconductor Processing Technicians, Separating, Filtering, Clarifying, Precipitating, and Still Machine Setters, Operators, and Tenders, Service Unit Operators, Oil and Gas, Surveyors, Transportation Vehicle, Equipment and Systems Inspectors, Except Aviation, Watch and Clock Repairers, Welders, Cutters, Solderers, and Brazers, Wellhead Pumpers, Woodworking Machine Setters, Operators, and Tenders, Except Sawing,",
+    "RCS": "Dining Room and Cafeteria Attendants and Bartender Helpers, Fast Food and Counter Workers, Magnetic Resonance Imaging Technologists,",
+    "RE": "Athletes and Sports Competitors, Carpet Installers, Cement Masons and Concrete Finishers, Cooks, Restaurant, Driver/Sales Workers, Telecommunications Line Installers and Repairers,",
+    "REC": "Barbers, Captains, Mates, and Pilots of Water Vessels, Computer Network Support Specialists, Correctional Officers and Jailers, Hoist and Winch Operators, Rotary Drill Operators, Oil and Gas, Shampooers, Telecommunications Engineering Specialists, Transit and Railroad Police, Transportation Security Screeners, Umpires, Referees, and Other Sports Officials,",
+    "RES": "Manicurists and Pedicurists,",
+    "RI": "Animal Breeders, Automotive Engineers, Fish and Game Wardens, Fuel Cell Engineers, Gem and Diamond Workers, Manufacturing Engineers, Mechanical Engineering Technologists and Technicians, Neurodiagnostic Technologists, Remote Sensing Scientists and Technologists, Robotics Technicians, Solar Energy Systems Engineers, Transportation Engineers, Veterinary Technologists and Technicians,",
+    "RIA": "Patternmakers, Wood,",
+    "RIC": "Aerospace Engineering and Operations Technologists and Technicians, Agricultural Technicians, Audio and Video Technicians, Automotive Engineering Technicians, Automotive Service Technicians and Mechanics, Avionics Technicians, Biological Technicians, Cartographers and Photogrammetrists, Civil Engineers, Computer User Support Specialists, Dental Laboratory Technicians, Earth Drillers, Except Oil and Gas, Electrical and Electronic Engineering Technologists and Technicians, Electrical and Electronics Repairers, Commercial and Industrial Equipment, Electrical Power-Line Installers and Repairers, Electricians, Electro-Mechanical and Mechatronics Technologists and Technicians, Electronic Equipment Installers and Repairers, Motor Vehicles, Elevator and Escalator Installers and Repairers, Endoscopy Technicians, Environmental Engineering Technologists and Technicians, Explosives Workers, Ordnance Handling Experts, and Blasters, Food Science Technicians, Geological Technicians, Except Hydrologic Technicians, Industrial Machinery Mechanics, Lathe and Turning Machine Tool Setters, Operators, and Tenders, Metal and Plastic, Logging Equipment Operators, Medical and Clinical Laboratory Technicians, Medical Equipment Repairers, Metal-Refining Furnace Operators and Tenders, Model Makers, Metal and Plastic, Non-Destructive Testing Specialists, Photonics Technicians, Power Distributors and Dispatchers, Precision Agriculture Technicians, Radio Frequency Identification Device Specialists, Recreational Vehicle Service Technicians, Remote Sensing Technicians, Stationary Engineers and Boiler Operators, Structural Iron and Steel Workers, Telecommunications Equipment Installers and Repairers, Except Line Installers, Tool and Die Makers,",
+    "RIE": "Commercial Pilots, Conservation Scientists, Fishing and Hunting Workers, Forest and Conservation Technicians, Foresters, Range Managers, Traffic Technicians, Wind Energy Engineers,",
+    "RIS": "Cardiovascular Technologists and Technicians, Medical Appliance Technicians,",
+    "RS": "Ambulance Drivers and Attendants, Except Emergency Medical Technicians, Bus Drivers, Transit and Intercity, Lifeguards, Ski Patrol, and Other Recreational Protective Service Workers,",
+    "RSC": "Animal Control Workers, Radiologic Technologists and Technicians, Surgical Technologists,",
+    "RSE": "Firefighters, Passenger Attendants,",
+    "RSI": "Anesthesiologist Assistants, Oral and Maxillofacial Surgeons, Veterinary Assistants and Laboratory Animal Caretakers,",
+    "S": "Career/Technical Education Teachers, Secondary School, Educational, Guidance, and Career Counselors and Advisors, Recreation and Fitness Studies Teachers, Postsecondary,",
+    "SA": "Architecture Teachers, Postsecondary, Art, Drama, and Music Teachers, Postsecondary, Childcare Workers, Communications Teachers, Postsecondary, Kindergarten Teachers, Except Special Education, Middle School Teachers, Except Special and Career/Technical Education, Preschool Teachers, Except Special Education, Recreational Therapists, Special Education Teachers, Middle School, Special Education Teachers, Preschool,",
+    "SAC": "Career/Technical Education Teachers, Middle School, Elementary School Teachers, Except Special Education, Training and Development Specialists,",
+    "SAE": "Adult Basic Education, Adult Secondary Education, and English as a Second Language Instructors, Nannies, Secondary School Teachers, Except Special and Career/Technical Education, Self-Enrichment Teachers,",
+    "SAI": "Art Therapists, Education Teachers, Postsecondary, English Language and Literature Teachers, Postsecondary, Foreign Language and Literature Teachers, Postsecondary, Marriage and Family Therapists, Music Therapists, Philosophy and Religion Teachers, Postsecondary, Substance Abuse and Behavioral Disorder Counselors,",
+    "SC": "Speech-Language Pathology Assistants, Teaching Assistants, Postsecondary,",
+    "SCE": "Eligibility Interviewers, Government Programs, Ushers, Lobby Attendants, and Ticket Takers,",
+    "SCR": "Medical Assistants, Nursing Assistants,",
+    "SE": "Arbitrators, Mediators, and Conciliators, Child, Family, and School Social Workers, Concierges, Emergency Management Directors, Health Education Specialists, Patient Representatives, Tour Guides and Escorts,",
+    "SEA": "Clergy, Political Science Teachers, Postsecondary, Recreation Workers,",
+    "SEC": "Education and Childcare Administrators, Preschool and Daycare, Equal Opportunity Representatives and Officers, Locker Room, Coatroom, and Dressing Room Attendants, Probation Officers and Correctional Treatment Specialists, Residential Advisors, Waiters and Waitresses,",
+    "SEI": "Business Teachers, Postsecondary,",
+    "SER": "Crossing Guards and Flaggers, Funeral Attendants, Psychiatric Technicians,",
+    "SI": "Advanced Practice Psychiatric Nurses, Anthropology and Archeology Teachers, Postsecondary, Atmospheric, Earth, Marine, and Space Sciences Teachers, Postsecondary, Biological Science Teachers, Postsecondary, Criminal Justice and Law Enforcement Teachers, Postsecondary, Economics Teachers, Postsecondary, Geography Teachers, Postsecondary, Health Informatics Specialists, Health Specialties Teachers, Postsecondary, Healthcare Social Workers, Hospitalists, Nurse Midwives, Nursing Instructors and Teachers, Postsecondary, Occupational Therapists, Physics Teachers, Postsecondary, Rehabilitation Counselors, Social Work Teachers, Postsecondary, Special Education Teachers, Secondary School, Tutors,",
+    "SIA": "Area, Ethnic, and Cultural Studies Teachers, Postsecondary, Environmental Science Teachers, Postsecondary, Family and Consumer Sciences Teachers, Postsecondary, Genetic Counselors, History Teachers, Postsecondary, Mathematical Science Teachers, Postsecondary, Mental Health and Substance Abuse Social Workers, Mental Health Counselors, Psychology Teachers, Postsecondary, Sociology Teachers, Postsecondary, Speech-Language Pathologists,",
+    "SIC": "Computer Science Teachers, Postsecondary, Library Science Teachers, Postsecondary, Registered Nurses,",
+    "SIE": "Community Health Workers, Instructional Coordinators, Law Teachers, Postsecondary,",
+    "SIR": "Acute Care Nurses, Agricultural Sciences Teachers, Postsecondary, Chemistry Teachers, Postsecondary, Chiropractors, Critical Care Nurses, Dietetic Technicians, Engineering Teachers, Postsecondary, Exercise Physiologists, Forestry and Conservation Science Teachers, Postsecondary, Hearing Aid Specialists, Low Vision Therapists, Orientation and Mobility Specialists, and Vision Rehabilitation Therapists, Nurse Practitioners, Physical Therapists, Physician Assistants, Preventive Medicine Physicians, Respiratory Therapists,",
+    "SR": "Adapted Physical Education Specialists, Career/Technical Education Teachers, Postsecondary, Home Health Aides, Licensed Practical and Licensed Vocational Nurses, Massage Therapists, Midwives, Occupational Therapy Aides, Occupational Therapy Assistants, Physical Therapist Aides,",
+    "SRA": "Park Naturalists,",
+    "SRC": "Dental Hygienists, Personal Care Aides, Psychiatric Aides, Radiation Therapists,",
+    "SRE": "Coaches and Scouts, Exercise Trainers and Group Fitness Instructors, Farm and Home Management Educators, Food Servers, Nonrestaurant,",
+    "SRI": "Acupuncturists, Athletic Trainers, Orthotists and Prosthetists, Physical Therapist Assistants,"
+  }
+}

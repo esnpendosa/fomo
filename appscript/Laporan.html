@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <base target="_top"/>
+  <title>FOMO — Laporan Hasil Holland Test</title>
+  <?!= include('CSS'); ?>
+  <style>
+    /* Panel detail geser dari kanan */
+    .panel-detail {
+      position: fixed; right: -540px; top:0; bottom:0; width:500px; max-width:95vw;
+      background: var(--white); box-shadow: -8px 0 32px rgba(0,0,0,.15);
+      z-index: 500; overflow-y: auto; transition: right .3s cubic-bezier(.4,0,.2,1);
+    }
+    .panel-detail.buka { right: 0; }
+    .overlay-panel { position: fixed; inset:0; background: rgba(0,0,0,.35); z-index:499; display:none; }
+    .overlay-panel.tampil { display: block; }
+    .panel-header { background: linear-gradient(135deg, #F39C12, #D35400); color: var(--white); padding: 18px 20px 16px; position: sticky; top:0; z-index:10; }
+    .panel-tutup { position: absolute; top:14px; right:14px; background: rgba(255,255,255,.2); border:none; color:var(--white); width:28px; height:28px; border-radius: var(--r-sm); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .panel-tutup:hover { background: rgba(255,255,255,.35); }
+    .panel-nama { font-size:17px; font-weight:800; margin-bottom:3px; }
+    .panel-sub  { font-size:12px; opacity:.9; }
+
+    /* Kartu ringkasan atas */
+    .ringkasan-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
+    .rk { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--r-lg); padding: 16px 14px; text-align: center; box-shadow: var(--shadow-sm); }
+    .rk-val  { font-size: 26px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+    .rk-lbl  { font-size: 11px; color: var(--gray-500); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .rk-ikon { margin-bottom: 6px; color: #D35400; }
+
+    /* Badge RIASEC */
+    .badge-riasec { font-family: monospace; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 4px; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .bid-Realistik   { background:#FEE2E2; color:#DC2626; font-weight:700; padding:2px 8px; border-radius:4px; font-size:11px; }
+    .bid-Investigatif{ background:#DBEAFE; color:#1D4ED8; font-weight:700; padding:2px 8px; border-radius:4px; font-size:11px; }
+    .bid-Artistik    { background:#EDE9FE; color:#7C3AED; font-weight:700; padding:2px 8px; border-radius:4px; font-size:11px; }
+    .bid-Sosial      { background:#DCFCE7; color:#15803D; font-weight:700; padding:2px 8px; border-radius:4px; font-size:11px; }
+    .bid-Enterprising{ background:#FEF3C7; color:#B45309; font-weight:700; padding:2px 8px; border-radius:4px; font-size:11px; }
+    .bid-Konvensional{ background:#E0F2FE; color:#0369A1; font-weight:700; padding:2px 8px; border-radius:4px; font-size:11px; }
+
+    .badge-kons { display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; }
+    .kons-Tinggi { background:#DCFCE7; color:#166534; }
+    .kons-Sedang { background:#FEF9C3; color:#854D0E; }
+    .kons-Rendah { background:#FEE2E2; color:#991B1B; }
+
+    /* Mini skor cell */
+    .skor-cell { font-family: monospace; font-size: 11px; font-weight: 700; color: #4B5563; }
+
+    @media print {
+      .app-header, .filter-bar, .aksi-header, .panel-detail, .overlay-panel, .print-hide { display:none!important; }
+      body { background: white; font-size: 10pt; }
+      .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      .data-table th, .data-table td { padding: 6px 4px !important; font-size: 9pt; }
+    }
+    @media(max-width:768px) {
+      .ringkasan-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Memuat laporan...</div>
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Overlay panel -->
+<div class="overlay-panel" id="overlayPanel" onclick="tutupPanel()"></div>
+
+<!-- ===== PANEL DETAIL ===== -->
+<div class="panel-detail" id="panelDetail">
+  <div class="panel-header">
+    <button class="panel-tutup" onclick="tutupPanel()"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    <div class="panel-nama" id="pNama">—</div>
+    <div class="panel-sub" id="pSub">—</div>
+  </div>
+  <div style="padding:18px;" id="panelIsi"><!-- Diisi JS --></div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header class="app-header">
+  <div class="header-brand">
+    <span style="font-size:16px;font-weight:800;color:var(--blue-800);letter-spacing:-0.5px;">FOMO</span>
+    <div class="brand-sep"></div>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--gray-800);">Laporan Lengkap Holland Test</div>
+      <div style="font-size:11px;color:var(--gray-500);" id="lapSubtitle">Memuat data...</div>
+    </div>
+  </div>
+  <div class="header-actions aksi-header print-hide">
+    <button class="btn btn-ghost btn-sm" onclick="muatData()" title="Muat ulang"><svg class="icon icon-sm"><use href="#i-refresh"/></svg></button>
+    <button class="btn btn-primary btn-sm" onclick="eksporExcel()" title="Download Excel Lengkap"><svg class="icon icon-sm"><use href="#i-download"/></svg> Download Excel</button>
+    <button class="btn btn-secondary btn-sm" onclick="eksporCSV()" title="Ekspor CSV"><svg class="icon icon-sm"><use href="#i-file-text"/></svg> CSV</button>
+    <button class="btn btn-ghost btn-sm" onclick="window.print()" title="Cetak"><svg class="icon icon-sm"><use href="#i-printer"/></svg></button>
+    <button class="btn btn-ghost btn-sm" onclick="kembaliAdmin()"><svg class="icon icon-sm"><use href="#i-arrow-left"/></svg> Admin</button>
+  </div>
+</header>
+
+<div class="page-content" style="max-width:1180px;">
+
+  <!-- Ringkasan -->
+  <div class="ringkasan-grid mt-4 mb-4" id="ringkasanGrid">
+    <div class="rk"><div class="rk-ikon"><svg class="icon icon-lg"><use href="#i-users"/></svg></div><div class="rk-val" id="rk-total">—</div><div class="rk-lbl">Total Siswa</div></div>
+    <div class="rk"><div class="rk-ikon" style="color:#2563EB;"><svg class="icon icon-lg"><use href="#i-book-open"/></svg></div><div class="rk-val" id="rk-sd">—</div><div class="rk-lbl">Peserta SD</div></div>
+    <div class="rk"><div class="rk-ikon" style="color:#DB2777;"><svg class="icon icon-lg"><use href="#i-palette"/></svg></div><div class="rk-val" id="rk-tk">—</div><div class="rk-lbl">Peserta TK</div></div>
+    <div class="rk"><div class="rk-ikon" style="color:#D97706;"><svg class="icon icon-lg"><use href="#i-award"/></svg></div><div class="rk-val" id="rk-bidang">—</div><div class="rk-lbl">Tipe Terbanyak</div></div>
+  </div>
+
+  <!-- Filter -->
+  <div class="card print-hide">
+    <div class="card-body" style="padding:14px 18px;">
+      <div class="filter-bar">
+        <div class="search-wrap" style="min-width:240px;">
+          <svg class="icon icon-sm search-ic"><use href="#i-search"/></svg>
+          <input type="text" class="search-input" id="cariInput" placeholder="Cari nama siswa, token, sekolah..." oninput="terapkanFilter()"/>
+        </div>
+        <select class="filter-select" id="filterJenjang" onchange="terapkanFilter()">
+          <option value="semua">Semua Pendidikan</option>
+          <option value="TK">TK</option>
+          <option value="SD">SD</option>
+          <option value="SMP">SMP</option>
+          <option value="SMA">SMA</option>
+          <option value="Umum">Umum</option>
+        </select>
+        <select class="filter-select" id="filterBidang" onchange="terapkanFilter()">
+          <option value="semua">Semua Bidang Utama</option>
+          <option value="Realistik">Realistik (R)</option>
+          <option value="Investigatif">Investigatif (I)</option>
+          <option value="Artistik">Artistik (A)</option>
+          <option value="Sosial">Sosial (S)</option>
+          <option value="Enterprising">Enterprising (E)</option>
+          <option value="Konvensional">Konvensional (C)</option>
+        </select>
+        <select class="filter-select" id="filterUrut" onchange="terapkanFilter()">
+          <option value="terbaru">Terbaru</option>
+          <option value="terlama">Terlama</option>
+          <option value="nama_az">Nama A—Z</option>
+          <option value="nama_za">Nama Z—A</option>
+        </select>
+        <select class="filter-select" id="filterPerHal" onchange="terapkanFilter()">
+          <option value="25">25 per halaman</option>
+          <option value="50">50 per halaman</option>
+          <option value="100">100 per halaman</option>
+          <option value="999">Semua</option>
+        </select>
+      </div>
+      <div class="d-flex justify-between align-center flex-wrap gap-2 mt-2">
+        <span style="font-size:12px;color:var(--gray-500);" id="infoFilter">Memuat data...</span>
+        <button class="btn btn-ghost btn-sm" onclick="resetFilter()">
+          <svg class="icon icon-xs"><use href="#i-x"/></svg> Reset Filter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabel utama -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon"><svg class="icon icon-sm"><use href="#i-table"/></svg></div>
+      <span class="card-title">Daftar Lengkap Hasil Holland Siswa</span>
+      <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="jumlahTabel">—</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:34px;">#</th>
+              <th>Token</th>
+              <th>Nama Siswa</th>
+              <th>L/P</th>
+              <th>Pendidikan</th>
+              <th>Sekolah</th>
+              <th>R</th><th>I</th><th>A</th><th>S</th><th>E</th><th>C</th>
+              <th>Kode</th>
+              <th>Bidang Utama</th>
+              <th>Konsistensi</th>
+              <th>Tanggal</th>
+              <th class="print-hide">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="bodyTabel">
+            <tr><td colspan="17" class="text-center" style="padding:40px;">
+              <div class="spinner" style="width:24px;height:24px;border-width:2.5px;margin:0 auto 10px;"></div>
+              <span style="color:var(--gray-400);font-size:13px;">Memuat laporan hasil...</span>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="paginasiWrap" style="padding:10px 16px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var APP_URL = '<?= ScriptApp.getService().getUrl() ?>';
+  var semuaData = [], dataFilter = [];
+  var halamanSaatIni = 1, perHalaman = 25;
+
+  window.onload = function() {
+    muatData();
+  };
+
+  function muatData(retryCount) {
+    retryCount = retryCount || 0;
+    setLoading(true,'Mengambil data laporan...');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        if (!res || !res.success) {
+          showToast(res ? res.message : 'Gagal memuat data.', 'error');
+          tampilGagalMemuat(res ? res.message : '');
+          return;
+        }
+        semuaData = res.data || [];
+        dataFilter = semuaData.slice();
+        hitungRingkasan();
+        terapkanFilter();
+        document.getElementById('lapSubtitle').textContent = semuaData.length + ' siswa telah menyelesaikan asesmen';
+      })
+      .withFailureHandler(function(err) {
+        if (retryCount < 1) {
+          setTimeout(function() { muatData(retryCount + 1); }, 1200);
+          return;
+        }
+        setLoading(false);
+        showToast('Koneksi terputus. Silakan klik muat ulang.', 'error');
+        tampilGagalMemuat(err ? err.message : '');
+      })
+      .getAllHasil('semua','semua');
+  }
+
+  function tampilGagalMemuat(msg) {
+    var body = document.getElementById('bodyTabel');
+    body.innerHTML = '<tr><td colspan="17" class="text-center" style="padding:40px;">' +
+      '<div class="empty-state">' +
+      '<div style="font-size:15px;font-weight:700;color:var(--red-600);margin-bottom:6px;">Gagal Menghubungi Database</div>' +
+      '<div style="font-size:12px;color:var(--gray-500);margin-bottom:14px;">' + (msg || 'Periksa koneksi internet atau hak akses Spreadsheet.') + '</div>' +
+      '<button class="btn btn-primary btn-sm" onclick="muatData()"><svg class="icon icon-sm"><use href="#i-refresh"/></svg> Coba Lagi</button>' +
+      '</div></td></tr>';
+  }
+
+  function hitungRingkasan() {
+    var total = semuaData.length;
+    var sd = semuaData.filter(function(r){ return (r.jenjang||r.pendidikan||'').toUpperCase().includes('SD'); }).length;
+    var tk = semuaData.filter(function(r){ return (r.jenjang||r.pendidikan||'').toUpperCase().includes('TK'); }).length;
+    var bcnt = {}; semuaData.forEach(function(r){ var b=r.bidangUtama||''; if(b) bcnt[b]=(bcnt[b]||0)+1; });
+    var topB = Object.keys(bcnt).sort(function(a,b){ return bcnt[b]-bcnt[a]; })[0]||'—';
+
+    document.getElementById('rk-total').textContent  = total;
+    document.getElementById('rk-sd').textContent     = sd;
+    document.getElementById('rk-tk').textContent     = tk;
+    document.getElementById('rk-bidang').textContent = topB;
+  }
+
+  function terapkanFilter() {
+    var q     = (document.getElementById('cariInput').value||'').toLowerCase();
+    var jenj  = document.getElementById('filterJenjang').value;
+    var bidang= document.getElementById('filterBidang').value;
+    var urut  = document.getElementById('filterUrut').value;
+    perHalaman= parseInt(document.getElementById('filterPerHal').value)||25;
+    halamanSaatIni = 1;
+
+    dataFilter = semuaData.filter(function(r) {
+      var mQ = !q || (r.nama||'').toLowerCase().includes(q) || (r.token||'').toLowerCase().includes(q) || (r.sekolah||'').toLowerCase().includes(q);
+      var mJ = jenj === 'semua' || (r.jenjang||r.pendidikan||'').toUpperCase().includes(jenj.toUpperCase());
+      var mB = bidang === 'semua' || (r.bidangUtama||'').toLowerCase().includes(bidang.toLowerCase());
+      return mQ && mJ && mB;
+    });
+
+    dataFilter.sort(function(a,b) {
+      if (urut==='terbaru') return new Date(b.timestamp||0)-new Date(a.timestamp||0);
+      if (urut==='terlama') return new Date(a.timestamp||0)-new Date(b.timestamp||0);
+      if (urut==='nama_az') return (a.nama||'').localeCompare(b.nama||'');
+      if (urut==='nama_za') return (b.nama||'').localeCompare(a.nama||'');
+      return 0;
+    });
+
+    var info = dataFilter.length === semuaData.length
+      ? 'Menampilkan semua ' + semuaData.length + ' data'
+      : 'Menampilkan ' + dataFilter.length + ' dari ' + semuaData.length + ' data';
+    document.getElementById('infoFilter').textContent = info;
+    renderTabel(); renderPaginasi();
+  }
+
+  function resetFilter() {
+    document.getElementById('cariInput').value = '';
+    document.getElementById('filterJenjang').value = 'semua';
+    document.getElementById('filterBidang').value  = 'semua';
+    document.getElementById('filterUrut').value    = 'terbaru';
+    document.getElementById('filterPerHal').value  = '25';
+    terapkanFilter();
+  }
+
+  function renderTabel() {
+    var body  = document.getElementById('bodyTabel');
+    var start = (halamanSaatIni-1) * perHalaman;
+    var end   = perHalaman >= 999 ? dataFilter.length : Math.min(start+perHalaman, dataFilter.length);
+    var irisan = dataFilter.slice(start, end);
+    document.getElementById('jumlahTabel').textContent = dataFilter.length + ' data' + (dataFilter.length !== semuaData.length ? ' (difilter)' : '');
+
+    if (!irisan.length) {
+      body.innerHTML = '<tr><td colspan="17" class="text-center" style="padding:40px;"><div class="empty-state"><div style="font-size:14px;color:var(--gray-500);">Tidak ada data yang cocok dengan pencarian</div></div></td></tr>';
+      return;
+    }
+
+    body.innerHTML = irisan.map(function(r,i) {
+      var idx = start + i + 1;
+      var jkBadge = (r.jenisKelamin||'').includes('P') ? 'P' : 'L';
+      var s = r.skor || {};
+      var bClass = 'bid-' + (r.bidangUtama||'Realistik').replace(/\s/g,'');
+      var kClass = 'kons-' + (r.konsistensi||'Sedang');
+
+      return '<tr style="cursor:pointer;" onclick="lihatDetail(\''+esc(r.token)+'\')">' +
+        '<td style="color:var(--gray-400);font-size:11px;">'+idx+'</td>' +
+        '<td><span class="mono" style="font-size:11px;font-weight:700;color:var(--blue-700);">'+esc(r.token)+'</span></td>' +
+        '<td style="font-weight:700;font-size:13px;">'+esc(r.nama||'—')+'</td>' +
+        '<td style="font-size:12px;color:var(--gray-600);text-align:center;">'+jkBadge+'</td>' +
+        '<td style="font-size:12px;">'+esc(r.pendidikan||r.jenjang||'SD')+'</td>' +
+        '<td style="font-size:12px;" class="truncate">'+esc(r.sekolah||'—')+'</td>' +
+        '<td class="skor-cell">'+(s.R||0)+'</td>' +
+        '<td class="skor-cell">'+(s.I||0)+'</td>' +
+        '<td class="skor-cell">'+(s.A||0)+'</td>' +
+        '<td class="skor-cell">'+(s.S||0)+'</td>' +
+        '<td class="skor-cell">'+(s.E||0)+'</td>' +
+        '<td class="skor-cell">'+(s.C||0)+'</td>' +
+        '<td><span class="badge-riasec">'+esc(r.top3Kode||'—')+'</span></td>' +
+        '<td><span class="'+bClass+'">'+esc(r.bidangUtama||'—')+'</span></td>' +
+        '<td><span class="badge-kons '+kClass+'">'+esc(r.konsistensi||'Sedang')+'</span></td>' +
+        '<td style="font-size:11px;white-space:nowrap;color:var(--gray-500);">'+esc(r.timestamp||'—')+'</td>' +
+        '<td class="print-hide" onclick="event.stopPropagation()"><div class="d-flex gap-1">' +
+          '<button class="btn btn-ghost btn-icon-sm" title="Lihat detail" onclick="lihatDetail(\''+esc(r.token)+'\')"><svg class="icon icon-sm"><use href="#i-search"/></svg></button>' +
+          '<a class="btn btn-ghost btn-icon-sm" href="'+APP_URL+'?page=hasil&token='+encodeURIComponent(r.token)+'" target="_blank" title="Buka Report Holland"><svg class="icon icon-sm"><use href="#i-external"/></svg></a>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderPaginasi() {
+    var wrap = document.getElementById('paginasiWrap');
+    if (perHalaman >= 999) { wrap.innerHTML = ''; return; }
+    var total = dataFilter.length, hal = Math.ceil(total/perHalaman);
+    if (hal <= 1) { wrap.innerHTML = ''; return; }
+    var h = '<div class="pagination">';
+    h += '<button class="pg-btn" onclick="keHalaman('+(halamanSaatIni-1)+')" '+(halamanSaatIni===1?'disabled':'')+'><svg class="icon" style="width:12px;height:12px;"><use href="#i-arrow-left"/></svg></button>';
+    var mulai = Math.max(1,halamanSaatIni-2), selesai = Math.min(hal,halamanSaatIni+2);
+    if (mulai>1)  h+='<button class="pg-btn" onclick="keHalaman(1)">1</button>'+(mulai>2?'<span class="pg-info">...</span>':'');
+    for(var p=mulai;p<=selesai;p++) h+='<button class="pg-btn'+(p===halamanSaatIni?' active':'')+'" onclick="keHalaman('+p+')">'+p+'</button>';
+    if (selesai<hal) h+=(selesai<hal-1?'<span class="pg-info">...</span>':'')+'<button class="pg-btn" onclick="keHalaman('+hal+')">'+hal+'</button>';
+    h += '<button class="pg-btn" onclick="keHalaman('+(halamanSaatIni+1)+')" '+(halamanSaatIni===hal?'disabled':'')+'><svg class="icon" style="width:12px;height:12px;"><use href="#i-arrow-right"/></svg></button>';
+    h += '<span class="pg-info">Hal. '+halamanSaatIni+'/'+hal+' ('+total+' data)</span></div>';
+    wrap.innerHTML = h;
+  }
+
+  function keHalaman(h) {
+    var hal = Math.ceil(dataFilter.length/perHalaman);
+    if (h<1||h>hal) return;
+    halamanSaatIni = h;
+    renderTabel(); renderPaginasi();
+  }
+
+  function lihatDetail(token) {
+    var r = semuaData.find(function(x){ return x.token===token; });
+    if (!r) return;
+    document.getElementById('pNama').textContent = r.nama || r.token;
+    document.getElementById('pSub').textContent  = (r.pendidikan||r.jenjang||'') + (r.sekolah ? ' — ' + r.sekolah : '');
+
+    var s = r.skor || {};
+    var html =
+      '<div style="background:#FFF8E7;border:1px solid #FDE68A;border-radius:var(--r-md);padding:14px 16px;margin-bottom:16px;">' +
+        '<div style="font-size:12px;color:#78350F;margin-bottom:4px;">Kode Holland: <strong style="font-size:16px;letter-spacing:2px;color:#B45309;">'+esc(r.top3Kode||'—')+'</strong> &nbsp;&bull;&nbsp; Konsistensi: <strong>'+esc(r.konsistensi||'Sedang')+'</strong></div>' +
+        '<div style="font-size:12px;color:#78350F;">Bidang Utama: <strong>'+esc(r.bidangUtama||'—')+'</strong></div>' +
+      '</div>' +
+      '<div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-md);padding:12px 16px;margin-bottom:16px;font-size:13px;">' +
+        '<div style="padding:4px 0;">Token: <span class="mono" style="font-weight:700;">'+esc(r.token)+'</span></div>' +
+        '<div style="padding:4px 0;">Jenis Kelamin: <strong>'+esc(r.jenisKelamin||'—')+'</strong></div>' +
+        '<div style="padding:4px 0;">Tanggal Lahir: <strong>'+esc(r.tanggalLahir||'—')+'</strong></div>' +
+        '<div style="padding:4px 0;">Pendidikan: <strong>'+esc(r.pendidikan||r.jenjang||'—')+'</strong></div>' +
+        '<div style="padding:4px 0;">Sekolah: <strong>'+esc(r.sekolah||'—')+'</strong></div>' +
+        '<div style="padding:4px 0;">Waktu Selesai: <strong>'+esc(r.timestamp||'—')+'</strong></div>' +
+      '</div>' +
+      '<div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:8px;text-transform:uppercase;">Skor RIASEC:</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;text-align:center;margin-bottom:18px;">' +
+        '<div style="background:#FEE2E2;padding:8px 4px;border-radius:6px;"><div style="font-size:11px;font-weight:700;color:#DC2626;">R</div><div style="font-size:16px;font-weight:800;color:#991B1B;">'+(s.R||0)+'</div></div>' +
+        '<div style="background:#DBEAFE;padding:8px 4px;border-radius:6px;"><div style="font-size:11px;font-weight:700;color:#2563EB;">I</div><div style="font-size:16px;font-weight:800;color:#1E40AF;">'+(s.I||0)+'</div></div>' +
+        '<div style="background:#EDE9FE;padding:8px 4px;border-radius:6px;"><div style="font-size:11px;font-weight:700;color:#7C3AED;">A</div><div style="font-size:16px;font-weight:800;color:#5B21B6;">'+(s.A||0)+'</div></div>' +
+        '<div style="background:#DCFCE7;padding:8px 4px;border-radius:6px;"><div style="font-size:11px;font-weight:700;color:#16A34A;">S</div><div style="font-size:16px;font-weight:800;color:#166534;">'+(s.S||0)+'</div></div>' +
+        '<div style="background:#FEF3C7;padding:8px 4px;border-radius:6px;"><div style="font-size:11px;font-weight:700;color:#D97706;">E</div><div style="font-size:16px;font-weight:800;color:#92400E;">'+(s.E||0)+'</div></div>' +
+        '<div style="background:#E0F2FE;padding:8px 4px;border-radius:6px;"><div style="font-size:11px;font-weight:700;color:#0284C7;">C</div><div style="font-size:16px;font-weight:800;color:#075985;">'+(s.C||0)+'</div></div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;">' +
+        '<a href="'+APP_URL+'?page=hasil&token='+encodeURIComponent(r.token)+'" target="_blank" class="btn btn-primary btn-full"><svg class="icon icon-sm"><use href="#i-external"/></svg> Buka Report Holland (Siswa)</a>' +
+        '<a href="'+APP_URL+'?page=laporan-siswa&token='+encodeURIComponent(r.token)+'" target="_blank" class="btn btn-secondary btn-full"><svg class="icon icon-sm"><use href="#i-file-text"/></svg> Buka Laporan Detail 108 Soal</a>' +
+      '</div>';
+
+    document.getElementById('panelIsi').innerHTML = html;
+    document.getElementById('panelDetail').classList.add('buka');
+    document.getElementById('overlayPanel').classList.add('tampil');
+  }
+
+  function tutupPanel() {
+    document.getElementById('panelDetail').classList.remove('buka');
+    document.getElementById('overlayPanel').classList.remove('tampil');
+  }
+
+  // ============================================================
+  // EKSPOR EXCEL & CSV (100% LENGKAP & ANTI BLOCKED)
+  // ============================================================
+  function eksporExcel() {
+    if (!dataFilter.length) { showToast('Tidak ada data untuk diekspor.','warning'); return; }
+
+    var headers = ['No','Token','Nama Siswa','Jenis Kelamin','Tanggal Lahir','Pendidikan','Sekolah','Skor R','Skor I','Skor A','Skor S','Skor E','Skor C','Kode Holland','Bidang Utama','Bidang 2','Bidang 3','Konsistensi','Tanggal Selesai'];
+    var rows = [headers];
+
+    dataFilter.forEach(function(r, idx) {
+      var s = r.skor || {};
+      rows.push([
+        idx + 1,
+        r.token || '',
+        r.nama || '',
+        r.jenisKelamin || 'Laki-laki',
+        r.tanggalLahir || '',
+        r.pendidikan || r.jenjang || 'SD',
+        r.sekolah || '',
+        s.R !== undefined ? s.R : 0,
+        s.I !== undefined ? s.I : 0,
+        s.A !== undefined ? s.A : 0,
+        s.S !== undefined ? s.S : 0,
+        s.E !== undefined ? s.E : 0,
+        s.C !== undefined ? s.C : 0,
+        r.top3Kode || '',
+        r.bidangUtama || '',
+        r.bidang2 || '',
+        r.bidang3 || '',
+        r.konsistensi || 'Sedang',
+        r.timestamp || ''
+      ]);
+    });
+
+    unduhFileExcel('laporan_lengkap_holland_' + new Date().toISOString().slice(0,10), rows);
+    showToast('Laporan Excel berhasil diunduh (' + dataFilter.length + ' data).', 'success');
+  }
+
+  function eksporCSV() {
+    if (!dataFilter.length) { showToast('Tidak ada data untuk diekspor.','warning'); return; }
+
+    var headers = ['No','Token','Nama_Siswa','Jenis_Kelamin','Tanggal_Lahir','Pendidikan','Sekolah','Skor_R','Skor_I','Skor_A','Skor_S','Skor_E','Skor_C','Kode_Holland','Bidang_Utama','Bidang_2','Bidang_3','Konsistensi','Tanggal'];
+    var lines = [headers.join(',')];
+
+    dataFilter.forEach(function(r, idx) {
+      var s = r.skor || {};
+      lines.push([
+        idx + 1,
+        r.token,
+        '"' + (r.nama || '').replace(/"/g, '""') + '"',
+        r.jenisKelamin || 'Laki-laki',
+        r.tanggalLahir || '',
+        r.pendidikan || r.jenjang || 'SD',
+        '"' + (r.sekolah || '').replace(/"/g, '""') + '"',
+        s.R || 0, s.I || 0, s.A || 0, s.S || 0, s.E || 0, s.C || 0,
+        r.top3Kode || '',
+        '"' + (r.bidangUtama || '') + '"',
+        '"' + (r.bidang2 || '') + '"',
+        '"' + (r.bidang3 || '') + '"',
+        r.konsistensi || 'Sedang',
+        r.timestamp || ''
+      ].join(','));
+    });
+
+    var blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'laporan_holland_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('CSV berhasil diunduh (' + dataFilter.length + ' data).', 'success');
+  }
+
+  function unduhFileExcel(filename, rows) {
+    // Bangun file Excel XML / HTML Spreadsheet asli (kebal blokir CDN)
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
+      '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">' +
+      '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>' +
+      '<x:Name>Laporan Holland</x:Name>' +
+      '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+      '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' +
+      '<style>' +
+      'table { border-collapse:collapse; font-family: Calibri, sans-serif; }' +
+      'th { background:#F39C12; color:#FFFFFF; font-weight:bold; border:1px solid #D1D5DB; padding:8px 12px; text-align:center; }' +
+      'td { border:1px solid #E5E7EB; padding:6px 10px; font-size:11pt; }' +
+      '.mono { font-family: Consolas, monospace; font-weight:bold; }' +
+      '</style>' +
+      '</head><body><table>';
+
+    rows.forEach(function(row, idx) {
+      html += '<tr>';
+      row.forEach(function(val) {
+        var tag = idx === 0 ? 'th' : 'td';
+        var txt = val !== undefined && val !== null ? String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+        html += '<' + tag + '>' + txt + '</' + tag + '>';
+      });
+      html += '</tr>';
+    });
+
+    html += '</table></body></html>';
+
+    var blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename + '.xls';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function navigasiKe(url) {
+    try {
+      var a = document.createElement('a');
+      a.href = url;
+      a.target = '_top';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { if (a && a.parentNode) a.parentNode.removeChild(a); }, 500);
+      return;
+    } catch(e) {}
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch(e) {}
+    window.location.href = url;
+  }
+
+  function kembaliAdmin() {
+    navigasiKe(APP_URL + '?page=admin');
+  }
+
+  function setLoading(show, text) {
+    var o = document.getElementById('loadingOverlay');
+    if (show) { o.classList.remove('hidden'); if(text) document.getElementById('loadingText').textContent = text; }
+    else o.classList.add('hidden');
+  }
+
+  function showToast(msg, type) {
+    var icons = { success:'i-check-circle', error:'i-alert-circle', info:'i-info', warning:'i-alert-tri' };
+    var t = document.createElement('div');
+    t.className = 'toast ' + (type || 'info');
+    t.innerHTML = '<svg class="icon icon-sm"><use href="#' + (icons[type] || 'i-info') + '"/></svg><span>' + msg + '</span>';
+    document.getElementById('toastWrap').appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  function esc(s) {
+    return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+  }
+
+  document.addEventListener('keydown', function(e) { if(e.key === 'Escape') tutupPanel(); });
+</script>
+</body>
+</html>

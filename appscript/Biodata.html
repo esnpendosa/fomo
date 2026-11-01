@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <base target="_top"/>
+  <title>FOMO — Biodata Peserta Holland Test</title>
+  <?!= include('CSS'); ?>
+  <style>
+    .jk-row, .pendidikan-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+    .select-card {
+      border: 1.5px solid var(--gray-200); border-radius: var(--r-lg);
+      padding: 12px 10px; text-align: center; cursor: pointer;
+      transition: all var(--tr); background: var(--white);
+    }
+    .select-card:hover { border-color: var(--blue-400); background: var(--blue-50); }
+    .select-card.selected { border-color: var(--blue-700); background: var(--blue-50); box-shadow: 0 0 0 3px rgba(21,101,192,.1); font-weight: 700; color: var(--blue-700); }
+    .select-card-icon { font-size: 18px; margin-bottom: 4px; }
+    .select-card-label { font-size: 13px; }
+    .autocomplete-list {
+      position: absolute; width: 100%; top: 100%; left: 0; z-index: 50;
+      background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--r-md);
+      box-shadow: var(--shadow-md); max-height: 180px; overflow-y: auto; display: none;
+    }
+    .autocomplete-list.show { display: block; }
+    .autocomplete-list li { padding: 9px 14px; cursor: pointer; font-size: 13px; transition: background var(--tr); }
+    .autocomplete-list li:hover { background: var(--blue-50); color: var(--blue-700); font-weight: 500; }
+    .required-note { font-size: 12px; color: var(--gray-400); margin-bottom: 18px; }
+  </style>
+</head>
+<body>
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Menyimpan data...</div>
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<header class="app-header">
+  <div class="header-brand">
+    <span style="font-size:16px;font-weight:800;color:var(--blue-800);letter-spacing:-0.5px;">FOMO</span>
+    <div class="brand-sep"></div>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--gray-800);">Biodata Peserta</div>
+      <div style="font-size:11px;color:var(--gray-500);">Langkah 1 dari 3 — Report Holland Test (RIASEC)</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="header-token" id="headerToken">—</span>
+  </div>
+</header>
+
+<div class="page-content" style="max-width:680px;">
+  <div class="step-bar mt-3 mb-4">
+    <div class="step-item active" ><div class="step-circle">1</div><div class="step-label">Biodata</div></div>
+    <div class="step-item"        ><div class="step-circle">2</div><div class="step-label">Instrumen</div></div>
+    <div class="step-item"        ><div class="step-circle">3</div><div class="step-label">Hasil</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#FFF8E7;border-bottom:1.5px solid #F39C12;">
+      <div class="card-header-icon" style="background:#F39C12;color:white;"><svg class="icon icon-sm"><use href="#i-pencil"/></svg></div>
+      <span class="card-title" style="color:#B7791F;font-weight:800;">Lengkapi Biodata Peserta Holland Test</span>
+    </div>
+    <div class="card-body">
+      <div id="alertBiodata"></div>
+      <p class="required-note">Isi data diri dengan benar sesuai identitas Anda. Bertanda <span style="color:var(--red-600);">*</span> wajib diisi.</p>
+
+      <!-- NAMA -->
+      <div class="form-group">
+        <label class="form-label">
+          <svg class="icon icon-sm"><use href="#i-user"/></svg> Nama Lengkap <span class="req">*</span>
+        </label>
+        <input type="text" id="fieldNama" class="form-control" placeholder="Contoh: Muhammad Budi Pratama"
+          maxlength="70" autocomplete="name" oninput="cc('fieldNama','cNama',70)"/>
+        <div class="char-count"><span id="cNama">0</span>/70</div>
+      </div>
+
+      <!-- JENIS KELAMIN -->
+      <div class="form-group">
+        <label class="form-label">
+          <svg class="icon icon-sm"><use href="#i-users"/></svg> Jenis Kelamin <span class="req">*</span>
+        </label>
+        <div class="jk-row">
+          <div class="select-card selected" onclick="pilihJK('Laki-laki')" id="cardJK_L">
+            <div class="select-card-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+                <circle cx="10" cy="14" r="5"></circle>
+                <line x1="19" y1="5" x2="13.6" y2="10.4"></line>
+                <polyline points="19 10 19 5 14 5"></polyline>
+              </svg>
+            </div>
+            <div class="select-card-label">Laki-laki</div>
+          </div>
+          <div class="select-card" onclick="pilihJK('Perempuan')" id="cardJK_P">
+            <div class="select-card-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+                <circle cx="12" cy="9" r="5"></circle>
+                <line x1="12" y1="14" x2="12" y2="21"></line>
+                <line x1="9" y1="18" x2="15" y2="18"></line>
+              </svg>
+            </div>
+            <div class="select-card-label">Perempuan</div>
+          </div>
+        </div>
+        <input type="hidden" id="fieldJK" value="Laki-laki"/>
+      </div>
+
+      <!-- TANGGAL LAHIR -->
+      <div class="form-group">
+        <label class="form-label">
+          <svg class="icon icon-sm"><use href="#i-calendar"/></svg> Tanggal Lahir <span class="req">*</span>
+        </label>
+        <input type="date" id="fieldTglLahir" class="form-control" required/>
+        <div class="form-hint">Pilih tanggal, bulan, dan tahun kelahiran.</div>
+      </div>
+
+      <!-- PENDIDIKAN / JENJANG -->
+      <div class="form-group">
+        <label class="form-label">
+          <svg class="icon icon-sm"><use href="#i-graduation"/></svg> Tingkat Pendidikan <span class="req">*</span>
+        </label>
+        <div class="pendidikan-row">
+          <div class="select-card" onclick="pilihPendidikan('TK')" id="cardPend_TK">
+            <div class="select-card-label">TK / PAUD</div>
+          </div>
+          <div class="select-card selected" onclick="pilihPendidikan('SD')" id="cardPend_SD">
+            <div class="select-card-label">SD / MI</div>
+          </div>
+          <div class="select-card" onclick="pilihPendidikan('SMP')" id="cardPend_SMP">
+            <div class="select-card-label">SMP / MTs</div>
+          </div>
+          <div class="select-card" onclick="pilihPendidikan('SMA')" id="cardPend_SMA">
+            <div class="select-card-label">SMA / SMK / MA</div>
+          </div>
+          <div class="select-card" onclick="pilihPendidikan('Umum')" id="cardPend_Umum">
+            <div class="select-card-label">Kuliah / Umum</div>
+          </div>
+        </div>
+        <input type="hidden" id="fieldPendidikan" value="SD"/>
+      </div>
+
+      <!-- ASAL SEKOLAH / INSTITUSI -->
+      <div class="form-group" style="position:relative;">
+        <label class="form-label">
+          <svg class="icon icon-sm"><use href="#i-building"/></svg> Asal Sekolah / Instansi <span class="req">*</span>
+        </label>
+        <input type="text" id="fieldSekolah" class="form-control" placeholder="Ketik nama sekolah atau instansi..."
+          maxlength="80" autocomplete="off"
+          oninput="cariSekolah(this.value)"
+          onblur="setTimeout(()=>document.getElementById('sekolahList').classList.remove('show'),200)"/>
+        <ul class="autocomplete-list" id="sekolahList"></ul>
+      </div>
+
+      <!-- NOMOR HP / WHATSAPP -->
+      <div class="form-group">
+        <label class="form-label">
+          <svg class="icon icon-sm"><use href="#i-phone"/></svg> Nomor WhatsApp / HP <span class="req">*</span>
+        </label>
+        <input type="tel" id="fieldNoHp" class="form-control" placeholder="Contoh: 081234567890"
+          maxlength="16" oninput="this.value=this.value.replace(/[^0-9+]/g,'')"/>
+        <div class="form-hint">Nomor aktif untuk pengiriman laporan hasil.</div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button class="btn btn-primary btn-full btn-lg" onclick="simpan()" id="btnSimpan">
+        <svg class="icon icon-sm"><use href="#i-arrow-right"/></svg> Simpan &amp; Lanjutkan ke Soal
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var APP_URL = '<?= ScriptApp.getService().getUrl() ?>';
+  var SEKOLAH = ['SDN 001','SDN 002','SDN 003','SDN 004','SDN 005','SD Islam Irada','SD Muhammadiyah','SD Al-Azhar','SDIT Nurul Fikri','SDIT Al-Hikmah','TK Islam Irada','TK Pertiwi','TK Aisyiyah','SMP Negeri 1','SMA Negeri 1','SMK Negeri 1','Umum'];
+  var currentToken = '';
+
+  function navigasiKe(url) {
+    try {
+      var a = document.createElement('a');
+      a.href = url;
+      a.target = '_top';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { if (a && a.parentNode) a.parentNode.removeChild(a); }, 500);
+      return;
+    } catch(e) {}
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch(e) {}
+    window.location.href = url;
+  }
+
+  window.onload = function() {
+    var p = new URLSearchParams(window.location.search);
+    currentToken = p.get('token') || sessionStorage.getItem('fomo_token') || '';
+    if (!currentToken) { navigasiKe(APP_URL + '?page=login'); return; }
+    document.getElementById('headerToken').textContent = currentToken;
+
+    // Ambil default jenjang dari session jika ada
+    var j = (sessionStorage.getItem('fomo_jenjang') || '').toUpperCase();
+    if (['TK','SD','SMP','SMA','UMUM'].includes(j)) {
+      pilihPendidikan(j === 'UMUM' ? 'Umum' : j);
+    }
+
+    // Cek apakah sudah pernah isi biodata sebelumnya
+    google.script.run
+      .withSuccessHandler(function(bio) {
+        if (bio && bio.ada) {
+          if (bio.nama) document.getElementById('fieldNama').value = bio.nama;
+          if (bio.jenisKelamin) pilihJK(bio.jenisKelamin);
+          if (bio.tanggalLahir) document.getElementById('fieldTglLahir').value = bio.tanggalLahir;
+          if (bio.pendidikan) pilihPendidikan(bio.pendidikan);
+          if (bio.sekolah) document.getElementById('fieldSekolah').value = bio.sekolah;
+          if (bio.noHp) document.getElementById('fieldNoHp').value = bio.noHp;
+          cc('fieldNama','cNama',70);
+        }
+      })
+      .cekBiodata(currentToken);
+  };
+
+  function pilihJK(jk) {
+    document.getElementById('fieldJK').value = jk;
+    document.getElementById('cardJK_L').classList.toggle('selected', jk === 'Laki-laki');
+    document.getElementById('cardJK_P').classList.toggle('selected', jk === 'Perempuan');
+  }
+
+  function pilihPendidikan(p) {
+    document.getElementById('fieldPendidikan').value = p;
+    ['TK','SD','SMP','SMA','Umum'].forEach(function(item) {
+      var el = document.getElementById('cardPend_' + item);
+      if (el) el.classList.toggle('selected', item.toUpperCase() === p.toUpperCase());
+    });
+  }
+
+  function cariSekolah(v) {
+    var list = document.getElementById('sekolahList');
+    if (!v || v.length < 2) { list.classList.remove('show'); return; }
+    var filtered = SEKOLAH.filter(s => s.toLowerCase().includes(v.toLowerCase())).slice(0, 8);
+    if (!filtered.length) { list.classList.remove('show'); return; }
+    list.innerHTML = filtered.map(s => '<li onclick="pilihSekolah(\'' + s.replace(/'/g,"\\'") + '\')">' + s + '</li>').join('');
+    list.classList.add('show');
+  }
+
+  function pilihSekolah(n) {
+    document.getElementById('fieldSekolah').value = n;
+    document.getElementById('sekolahList').classList.remove('show');
+  }
+
+  function cc(fId, cId, max) {
+    document.getElementById(cId).textContent = document.getElementById(fId).value.length;
+  }
+
+  function simpan() {
+    var nama = document.getElementById('fieldNama').value.trim();
+    var jk = document.getElementById('fieldJK').value;
+    var tgl = document.getElementById('fieldTglLahir').value;
+    var pend = document.getElementById('fieldPendidikan').value;
+    var sek = document.getElementById('fieldSekolah').value.trim();
+    var hp = document.getElementById('fieldNoHp').value.trim();
+
+    var errs = [];
+    if (nama.length < 3) errs.push('Nama lengkap minimal 3 karakter.');
+    if (!tgl) errs.push('Tanggal lahir harus diisi.');
+    if (!sek) errs.push('Asal sekolah/instansi harus diisi.');
+    if (hp.length < 8) errs.push('Nomor WhatsApp / HP tidak valid.');
+
+    if (errs.length) {
+      showAlert('alertBiodata','error', errs[0]);
+      window.scrollTo({top:0,behavior:'smooth'});
+      return;
+    }
+
+    setLoading(true,'Menyimpan biodata...');
+    document.getElementById('btnSimpan').disabled = true;
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        setLoading(false);
+        document.getElementById('btnSimpan').disabled = false;
+        if (!res.success) {
+          showAlert('alertBiodata','error', res.message);
+          return;
+        }
+
+        sessionStorage.setItem('fomo_nama', nama);
+        sessionStorage.setItem('fomo_jk', jk);
+        sessionStorage.setItem('fomo_tgl', tgl);
+        sessionStorage.setItem('fomo_pendidikan', pend);
+        sessionStorage.setItem('fomo_jenjang', pend);
+        sessionStorage.setItem('fomo_sekolah', sek);
+
+        showToast('Biodata tersimpan. Memuat lembar soal...', 'success');
+        setTimeout(() => {
+          navigasiKe(APP_URL + '?page=instrumen&token=' + encodeURIComponent(currentToken));
+        }, 800);
+      })
+      .withFailureHandler(function(err) {
+        setLoading(false);
+        document.getElementById('btnSimpan').disabled = false;
+        showAlert('alertBiodata','error','Gagal menyimpan biodata: ' + (err.message || 'Coba lagi.'));
+      })
+      .simpanBiodata(currentToken, nama, jk, tgl, pend, sek, hp);
+  }
+
+  function setLoading(show, text) {
+    var o = document.getElementById('loadingOverlay');
+    if (show) { o.classList.remove('hidden'); if (text) document.getElementById('loadingText').textContent = text; }
+    else o.classList.add('hidden');
+  }
+
+  function showAlert(id, type, msg) {
+    var icons = { success:'i-check-circle', error:'i-alert-circle', info:'i-info', warning:'i-alert-tri' };
+    document.getElementById(id).innerHTML = '<div class="alert alert-' + type + '"><svg class="icon icon-sm"><use href="#' + (icons[type]||'i-info') + '"/></svg><span>' + msg + '</span></div>';
+  }
+
+  function showToast(msg, type) {
+    var icons = { success:'i-check-circle', error:'i-alert-circle', info:'i-info', warning:'i-alert-tri' };
+    var t = document.createElement('div'); t.className = 'toast ' + (type || 'info');
+    t.innerHTML = '<svg class="icon icon-sm"><use href="#' + (icons[type] || 'i-info') + '"/></svg><span>' + msg + '</span>';
+    document.getElementById('toastWrap').appendChild(t); setTimeout(() => t.remove(), 3500);
+  }
+</script>
+</body>
+</html>
